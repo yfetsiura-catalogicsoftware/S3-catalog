@@ -1,5 +1,7 @@
 package pl.catalogic.demo.s3;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -7,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,14 +47,26 @@ public class S3Controller {
   }
 
   @PostMapping("/buckets/upload/{bucketName}")
-  public ResponseEntity<String> uploadFileToRootOfBucket(
+  public ResponseEntity<String> uploadMultipartFile(
       @PathVariable String bucketName, @RequestParam("file") MultipartFile file) {
+    try {
+      File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+      file.transferTo(tempFile);
 
-    if (file.isEmpty()) {
-      return ResponseEntity.badRequest().body("File is empty");
+      s3Service.uploadFile(bucketName, file.getOriginalFilename(), tempFile);
+      tempFile.delete();
+
+      return ResponseEntity.ok("Файл успішно завантажено на S3!");
+
+    } catch (IOException e) {
+      return ResponseEntity.status(500).body("Помилка під час завантаження: " + e.getMessage());
     }
-    System.out.println(file);
-    s3Service.uploadObject(bucketName, file);
-    return ResponseEntity.ok("File uploaded successfully");
+  }
+
+  @GetMapping("/buckets/replication/{replicatedBucketName}/{destinationBucketName}")
+  public ResponseEntity<String> replication(
+      @PathVariable String replicatedBucketName, @PathVariable String destinationBucketName) {
+    s3Service.enableReplication(replicatedBucketName,destinationBucketName);
+    return ResponseEntity.ok("Copied");
   }
 }

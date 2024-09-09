@@ -1,5 +1,7 @@
 package pl.catalogic.demo.s3;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -18,12 +20,29 @@ import pl.catalogic.demo.s3.model.S3ObjectDto;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.Destination;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListPartsRequest;
+import software.amazon.awssdk.services.s3.model.ListPartsResponse;
+import software.amazon.awssdk.services.s3.model.PutBucketReplicationRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.ReplicationConfiguration;
+import software.amazon.awssdk.services.s3.model.ReplicationRule;
+import software.amazon.awssdk.services.s3.model.ReplicationRuleStatus;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.StorageClass;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
+import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -127,7 +146,6 @@ public class S3Service {
   public void downloadObject(String bucketName, String key) {
     GetObjectRequest getObjectRequest =
         GetObjectRequest.builder().bucket(bucketName).key(key).build();
-
     Path targetPath = Paths.get(downloadDir, bucketName, key);
 
     try {
@@ -139,12 +157,11 @@ public class S3Service {
     }
   }
 
-  public void uploadObject(String bucketName, MultipartFile multipartFile) {
+  public void uploadObjectDirectly(String bucketName, MultipartFile multipartFile) {
     PutObjectRequest request = PutObjectRequest.builder()
         .bucket(bucketName)
         .key(multipartFile.getOriginalFilename())
         .build();
-
     try (InputStream inputStream = multipartFile.getInputStream()) {
       RequestBody requestBody = RequestBody.fromInputStream(inputStream, multipartFile.getSize());
       s3Client.putObject(request, requestBody);
@@ -153,4 +170,84 @@ public class S3Service {
       throw new RuntimeException("Failed to upload file to S3", e);
     }
   }
+
+  public String uploadFile(String bucketName, String keyName, File file) throws IOException {
+    CreateMultipartUploadRequest createRequest = CreateMultipartUploadRequest.builder()
+        .bucket(bucketName)
+        .key(keyName)
+        .build();
+
+    CreateMultipartUploadResponse response = s3Client.createMultipartUpload(createRequest);
+    String uploadId = response.uploadId();
+    System.out.println(uploadId);
+    List<CompletedPart> completedParts = new ArrayList<>();
+    long partSize = 5 * 1024 * 1024; // 5 MB
+    byte[] buffer = new byte[(int) partSize];
+    int partNumber = 1;
+
+    try (FileInputStream fis = new FileInputStream(file)) {
+      int bytesRead;
+      while ((bytesRead = fis.read(buffer)) > 0) {
+        UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+            .bucket(bucketName)
+            .key(keyName)
+            .uploadId(uploadId)
+            .partNumber(partNumber)
+            .build();
+        UploadPartResponse uploadPartResponse = s3Client.uploadPart(uploadPartRequest, RequestBody.fromBytes(buffer));
+        completedParts.add(CompletedPart.builder()
+            .partNumber(partNumber)
+            .eTag(uploadPartResponse.eTag())
+            .build());
+        partNumber++;
+      }
+    } catch (IOException e) {
+      abortMultipartUpload(bucketName, keyName, uploadId);
+      throw e;
+    }
+
+    CompleteMultipartUploadRequest completeRequest = CompleteMultipartUploadRequest.builder()
+        .bucket(bucketName)
+        .key(keyName)
+        .uploadId(uploadId)
+        .multipartUpload(CompletedMultipartUpload.builder().parts(completedParts).build())
+        .build();
+
+    CompleteMultipartUploadResponse completeResponse = s3Client.completeMultipartUpload(completeRequest);
+    System.out.println("Multipart upload complete");
+    return completeResponse.location();
+  }
+
+  private void abortMultipartUpload(String bucketName, String keyName, String uploadId) {
+    AbortMultipartUploadRequest abortRequest = AbortMultipartUploadRequest.builder()
+        .bucket(bucketName)
+        .key(keyName)
+        .uploadId(uploadId)
+        .build();
+    s3Client.abortMultipartUpload(abortRequest);
+  }
+
+  public void enableReplication(String sourceBucketName, String destinationBucketArn) {
+    String roleArn = "arn:aws:iam::123456789012:role/dcadmin";
+    ReplicationConfiguration replicationConfiguration = ReplicationConfiguration.builder()
+        .role(roleArn)
+        .rules(ReplicationRule.builder()
+            .status(ReplicationRuleStatus.ENABLED)
+            .priority(1)
+            .destination(Destination.builder()
+                .bucket(destinationBucketArn)
+                .storageClass(StorageClass.STANDARD)
+                .build())
+            .build())
+        .build();
+
+    PutBucketReplicationRequest request = PutBucketReplicationRequest.builder()
+        .bucket(sourceBucketName)
+        .replicationConfiguration(replicationConfiguration)
+        .build();
+
+    s3Client.putBucketReplication(request);
+  }
+
+
 }
