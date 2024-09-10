@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
@@ -23,7 +22,7 @@ public class S3Config {
   @Value("${aws.s3.region}")
   private String region;
 
-  @Bean
+  @Bean(name = "s3ClientBackup")
   public S3Client s3Client() {
     return S3Client.builder()
         .endpointOverride(URI.create("http://backup42:4285"))
@@ -35,11 +34,24 @@ public class S3Config {
         .build();
   }
 
+  @Bean(name = "s3ClientTester")
+  public S3Client s3ClientForTester() {
+    return S3Client.builder()
+        .endpointOverride(URI.create("https://catalogic-demo.cloud.datacore.com/"))
+        .region(Region.of(region))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(
+                    "207eda0c56a27027e328a70388c0737f",
+                    "cMnGbfQ0cZrYNwZ8gZblTxc2fTbdRNGV3giz5AtA")))
+        .forcePathStyle(true)
+        .build();
+  }
+
   @Bean
   public ObjectMapper objectMapper() {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
     return objectMapper;
   }
-
 }
