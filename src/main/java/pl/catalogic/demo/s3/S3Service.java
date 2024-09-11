@@ -10,7 +10,6 @@ import pl.catalogic.demo.s3.model.S3ObjectDto;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.BucketLifecycleConfiguration;
 import software.amazon.awssdk.services.s3.model.BucketVersioningStatus;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
@@ -226,9 +225,10 @@ public class S3Service {
   }
 
   @SneakyThrows
-  public List<Bucket> listBucketsAsync(){
+  public List<BucketDto> listBucketsAsync() {
     CompletableFuture<ListBucketsResponse> futureResponse = s3Client.listBuckets();
-    ListBucketsResponse response = futureResponse.get();
-    return response.buckets();
+    return futureResponse.get().buckets().stream()
+        .map(b -> new BucketDto(b.name(), b.creationDate().toString()))
+        .toList();
   }
 }
