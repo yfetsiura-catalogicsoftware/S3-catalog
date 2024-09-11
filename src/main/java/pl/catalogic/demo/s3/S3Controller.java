@@ -3,6 +3,7 @@ package pl.catalogic.demo.s3;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,56 +29,29 @@ public class S3Controller {
 
   @GetMapping("/buckets")
   public List<BucketDto> listBuckets() {
-    return s3Service.listBucket();
+    return s3Service.listBucketsAsync();
   }
 
-  @PostMapping("/buckets/{bucketName}")
-  public ResponseEntity<Void> createBucket(@PathVariable String bucketName) {
-    s3Service.createBucket(bucketName);
-    return new ResponseEntity<>(HttpStatus.CREATED);
-  }
 
   @GetMapping("/buckets/{bucketName}")
-  public List<S3ObjectDto> listObjects(@PathVariable String bucketName) {
+  public CompletableFuture<List<S3ObjectDto>> listObjects(@PathVariable String bucketName) {
     return s3Service.getAllObjects(bucketName);
   }
 
-  @GetMapping("/buckets/download")
-  public String downloadAllFiles() {
-    s3Service.downloadAllBuckets();
-    return "Завантаження завершено!";
-  }
 
-  @PostMapping("/buckets/upload/{bucketName}")
-  public ResponseEntity<String> uploadMultipartFile(
-      @PathVariable String bucketName, @RequestParam("file") MultipartFile file) {
-    try {
-      File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
-      file.transferTo(tempFile);
-
-      s3Service.uploadFile(bucketName, file.getOriginalFilename(), tempFile);
-      tempFile.delete();
-
-      return ResponseEntity.ok("Файл успішно завантажено на S3!");
-
-    } catch (IOException e) {
-      return ResponseEntity.status(500).body("Помилка під час завантаження: " + e.getMessage());
-    }
-  }
-
-  @GetMapping("/buckets/replication/{replicatedBucketName}")
-  public ResponseEntity<String> replication(
+  @GetMapping("/buckets/backup/{replicatedBucketName}")
+  public ResponseEntity<String> backup(
       @PathVariable String replicatedBucketName) {
     s3Service.transferBucket(replicatedBucketName);
     return ResponseEntity.ok("Copied");
   }
 
-  @GetMapping("/buckets/versions/{bucketName}")
-  public ResponseEntity<List<ObjectInfoDto>> versions(
-      @PathVariable String bucketName) {
-    List<ObjectInfoDto> list = s3Service.listObjectVersions(bucketName).stream()
-        .map(o -> new ObjectInfoDto(o.eTag(), o.size(), o.key(), o.versionId(), o.isLatest(), o.lastModified().toString()))
-        .toList();
-    return ResponseEntity.ok(list);
-  }
+//  @GetMapping("/buckets/versions/{bucketName}")
+//  public ResponseEntity<List<ObjectInfoDto>> versions(
+//      @PathVariable String bucketName) {
+//    List<ObjectInfoDto> list = s3Service.listObjectVersions(bucketName).stream()
+//        .map(o -> new ObjectInfoDto(o.eTag(), o.size(), o.key(), o.versionId(), o.isLatest(), o.lastModified().toString()))
+//        .toList();
+//    return ResponseEntity.ok(list);
+//  }
 }

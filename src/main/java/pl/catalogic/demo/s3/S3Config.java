@@ -9,22 +9,29 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class S3Config {
-  @Value("${aws.access.key}")
+  @Value("${aws.access.key.first}")
   private String awsAccessKey;
 
-  @Value("${aws.secret.access.key}")
+  @Value("${aws.secret.access.key.first}")
   private String awsSecretAccessKey;
+
+  @Value("${aws.access.key.second}")
+  private String awsAccessKeySecond;
+
+  @Value("${aws.secret.access.key.second}")
+  private String awsSecretAccessKeySecond;
 
   @Value("${aws.s3.region}")
   private String region;
 
   @Bean(name = "s3ClientBackup")
-  public S3Client s3Client() {
-    return S3Client.builder()
+  public S3AsyncClient s3Client() {
+    return S3AsyncClient.builder()
         .endpointOverride(URI.create("http://backup42:4285"))
         .region(Region.of(region))
         .credentialsProvider(
@@ -35,15 +42,15 @@ public class S3Config {
   }
 
   @Bean(name = "s3ClientTester")
-  public S3Client s3ClientForTester() {
-    return S3Client.builder()
-        .endpointOverride(URI.create("https://catalogic-demo.cloud.datacore.com/"))
+  public S3AsyncClient s3ClientForTester() {
+    return S3AsyncClient.builder()
+        .endpointOverride(URI.create("http://172.20.2.121:9000"))
         .region(Region.of(region))
         .credentialsProvider(
             StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(
-                    "207eda0c56a27027e328a70388c0737f",
-                    "cMnGbfQ0cZrYNwZ8gZblTxc2fTbdRNGV3giz5AtA")))
+                    awsAccessKeySecond,
+                    awsSecretAccessKeySecond)))
         .forcePathStyle(true)
         .build();
   }
