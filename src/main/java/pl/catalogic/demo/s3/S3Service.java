@@ -1,5 +1,7 @@
 package pl.catalogic.demo.s3;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -8,9 +10,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import pl.catalogic.demo.s3.model.BucketDto;
 import pl.catalogic.demo.s3.model.S3ObjectDto;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
+import software.amazon.awssdk.core.async.ResponsePublisher;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 import software.amazon.awssdk.services.s3.model.BucketLifecycleConfiguration;
 import software.amazon.awssdk.services.s3.model.BucketVersioningStatus;
 import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
@@ -21,6 +27,7 @@ import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ExpirationStatus;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.LifecycleRule;
 import software.amazon.awssdk.services.s3.model.LifecycleRuleFilter;
 import software.amazon.awssdk.services.s3.model.ListBucketsRequest;
@@ -35,6 +42,7 @@ import software.amazon.awssdk.services.s3.model.ObjectVersion;
 import software.amazon.awssdk.services.s3.model.PutBucketLifecycleConfigurationRequest;
 import software.amazon.awssdk.services.s3.model.PutBucketVersioningRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.model.VersioningConfiguration;
@@ -44,7 +52,7 @@ public class S3Service {
 
   private final S3AsyncClient s3Client;
   private final S3AsyncClient s3ClientTester;
-  private static  final long PART_SIZE = 5 * 1024 * 1024; // 5MB частини
+  private static final long PART_SIZE = 5 * 1024 * 1024; // 5MB частини
 
   public S3Service(
       @Qualifier("s3ClientBackup") S3AsyncClient s3Client,
@@ -228,7 +236,6 @@ public class S3Service {
     }
   }
 
-
   private CompletableFuture<Void> multipartUpload(String bucketName, String keyName, byte[] data) {
 
     CreateMultipartUploadRequest createRequest =
@@ -311,5 +318,17 @@ public class S3Service {
         .thenRun(() -> System.out.println("Multipart upload completed for object: " + keyName));
   }
 
+  public void transferFile(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey) {
+    try {
+      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+          .bucket(sourceBucket)
+          .key(sourceKey)
+          .build();
 
+
+    } catch (S3Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Failed to transfer file", e);
+    }
+  }
 }

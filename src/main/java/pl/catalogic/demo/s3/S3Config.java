@@ -54,6 +54,31 @@ public class S3Config {
         .forcePathStyle(true)
         .build();
   }
+  @Bean(name = "s3ClientBackupSyn")
+  public S3Client s3ClientSyn() {
+    return S3Client.builder()
+        .endpointOverride(URI.create("http://backup42:4285"))
+        .region(Region.of(region))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(awsAccessKey, awsSecretAccessKey)))
+        .forcePathStyle(true)
+        .build();
+  }
+
+  @Bean(name = "s3ClientTesterSyn")
+  public S3Client s3ClientForTesterSyn() {
+    return S3Client.builder()
+        .endpointOverride(URI.create("http://172.20.2.121:9000"))
+        .region(Region.of(region))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(
+                    awsAccessKeySecond,
+                    awsSecretAccessKeySecond)))
+        .forcePathStyle(true)
+        .build();
+  }
 
   @Bean
   public ObjectMapper objectMapper() {

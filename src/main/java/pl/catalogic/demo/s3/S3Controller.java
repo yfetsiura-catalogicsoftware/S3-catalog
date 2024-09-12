@@ -19,15 +19,7 @@ public class S3Controller {
 
   private final S3Service s3Service;
 
-  @GetMapping("/buckets")
-  public List<BucketDto> listBuckets() {
-    return s3Service.listBucketsAsync();
-  }
 
-  @GetMapping("/buckets/{bucketName}")
-  public CompletableFuture<List<S3ObjectDto>> listObjects(@PathVariable String bucketName) {
-    return s3Service.getAllObjects(bucketName);
-  }
 
   @GetMapping("/buckets/backup/{replicatedBucketName}")
   public ResponseEntity<String> backup(@PathVariable String replicatedBucketName) {
