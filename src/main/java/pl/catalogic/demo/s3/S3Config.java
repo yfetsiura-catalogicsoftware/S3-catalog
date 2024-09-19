@@ -3,11 +3,13 @@ package pl.catalogic.demo.s3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.net.URI;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -29,9 +31,11 @@ public class S3Config {
   @Value("${aws.s3.region}")
   private String region;
 
-  @Bean(name = "s3ClientBackup")
+  @Bean(name = "DataCore")
   public S3AsyncClient s3Client() {
     return S3AsyncClient.builder()
+//        .httpClientBuilder(NettyNioAsyncHttpClient.builder().maxConcurrency(7).connectionAcquisitionTimeout(Duration.ofSeconds(60)))
+        .multipartEnabled(true)
         .endpointOverride(URI.create("http://backup42:4285"))
         .region(Region.of(region))
         .credentialsProvider(
@@ -41,34 +45,11 @@ public class S3Config {
         .build();
   }
 
-  @Bean(name = "s3ClientTester")
+  @Bean(name = "MiniO")
   public S3AsyncClient s3ClientForTester() {
     return S3AsyncClient.builder()
-        .endpointOverride(URI.create("http://172.20.2.121:9000"))
-        .region(Region.of(region))
-        .credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(
-                    awsAccessKeySecond,
-                    awsSecretAccessKeySecond)))
-        .forcePathStyle(true)
-        .build();
-  }
-  @Bean(name = "s3ClientBackupSyn")
-  public S3Client s3ClientSyn() {
-    return S3Client.builder()
-        .endpointOverride(URI.create("http://backup42:4285"))
-        .region(Region.of(region))
-        .credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(awsAccessKey, awsSecretAccessKey)))
-        .forcePathStyle(true)
-        .build();
-  }
-
-  @Bean(name = "s3ClientTesterSyn")
-  public S3Client s3ClientForTesterSyn() {
-    return S3Client.builder()
+        .multipartEnabled(true)
+//        .httpClientBuilder(NettyNioAsyncHttpClient.builder().maxConcurrency(10).connectionAcquisitionTimeout(Duration.ofSeconds(60)))
         .endpointOverride(URI.create("http://172.20.2.121:9000"))
         .region(Region.of(region))
         .credentialsProvider(

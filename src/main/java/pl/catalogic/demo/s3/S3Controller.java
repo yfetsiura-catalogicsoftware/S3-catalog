@@ -1,41 +1,41 @@
 package pl.catalogic.demo.s3;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.catalogic.demo.s3.model.BucketDto;
-import pl.catalogic.demo.s3.model.S3ObjectDto;
+import pl.catalogic.demo.s3.model.BucketResponse;
+import pl.catalogic.demo.s3.model.S3ObjectResponse;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class S3Controller {
 
-  private final S3synchro synchro;
+  private final Asynchro asynchro;
 
-  @GetMapping("/buckets/backup/{replicatedBucketName}")
-  public ResponseEntity<String> backup(@PathVariable String replicatedBucketName) {
-    synchro.transferBucketObjects(replicatedBucketName, replicatedBucketName);
+  @GetMapping("/buckets/backup/{sourceBucket}/{fromTo}")
+  public ResponseEntity<String> backup(@PathVariable String sourceBucket, @PathVariable String fromTo) {
+    asynchro.transferBucket(sourceBucket,fromTo);
     return ResponseEntity.ok("Backup started");
   }
 
-  @GetMapping("/buckets/list/{bucketName}")
-  public ResponseEntity<List<S3ObjectDto>> listObjectsList(@PathVariable String bucketName) {
-    List<S3ObjectDto> list =
-        synchro.getAll3SObjects(bucketName).stream()
-            .map(o -> new S3ObjectDto(o.key(), o.lastModified().toString(), o.eTag(), o.size()))
-            .toList();
+  @GetMapping("/buckets/{bucketName}/{client}")
+  public ResponseEntity<List<S3ObjectResponse>> listObjectsList(@PathVariable String bucketName, @PathVariable String client) {
+    List<S3ObjectResponse> list = asynchro.getS3Objects(bucketName, client).stream()
+        .map(
+            o -> new S3ObjectResponse(o.key(), o.lastModified().toString(), o.eTag(), o.size(),
+                o.storageClassAsString()))
+        .toList();
     return ResponseEntity.ok(list);
   }
 
-  @GetMapping("/buckets")
-  public ResponseEntity<List<BucketDto>> listBuckets() {
-    return ResponseEntity.ok(synchro.listBuckets());
+  @GetMapping("/buckets/{client}")
+  public ResponseEntity<List<BucketResponse>> listBuckets(@PathVariable String client) {
+    List<BucketResponse> bucketResponses = asynchro.getBuckets(client);
+    return ResponseEntity.ok(bucketResponses);
   }
-
 }
