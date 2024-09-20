@@ -3,7 +3,6 @@ package pl.catalogic.demo.s3;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,12 +71,12 @@ public class Asynchro {
 
   @Async
   public void transferBucket(String sourceBucket, String fromTo) {
-    List<S3AsyncClient> clients = makeClientList(fromTo);
-    List<S3ObjectRequest> files = getS3Objects(sourceBucket, clients.get(0)).stream()
+    var clients = makeClientList(fromTo);
+    var files = getS3Objects(sourceBucket, clients.get(0)).stream()
         .map(o -> new S3ObjectRequest(o.key(), o.size()))
         .toList();
 
-    List<CompletableFuture<Void>> transferResults = new ArrayList<>();
+    var transferResults = new ArrayList<>();
 
     for (S3ObjectRequest file : files) {
       CompletableFuture<Void> result;
@@ -88,8 +87,7 @@ public class Asynchro {
       }
       transferResults.add(result);
     }
-    CompletableFuture<Void> allTransfers = CompletableFuture.allOf(transferResults.toArray(new CompletableFuture[0]));
-    allTransfers
+    CompletableFuture.allOf(transferResults.toArray(new CompletableFuture[0]))
         .thenRun(() -> logger.info("Backup completed.Copied " + files.size() + " files"))
         .exceptionally(ex -> {
           logger.error("Backup is failed. " + ex.getMessage());
@@ -111,11 +109,11 @@ public class Asynchro {
         multipartUploadSemaphore.acquire();
 
         Failsafe.with(retryPolicy).run(() -> {
-          InputStream inputStream = getObjectFromSource(sourceClient, sourceBucket, file.key());
+          var inputStream = getObjectFromSource(sourceClient, sourceBucket, file.key());
 
-          String uploadId = initiateMultipartUpload(destinationClient, destinationBucket, file);
+          var uploadId = initiateMultipartUpload(destinationClient, destinationBucket, file);
 
-          List<CompletedPart> completedParts = uploadParts(destinationClient, inputStream, uploadId, destinationBucket,
+          var completedParts = uploadParts(destinationClient, inputStream, uploadId, destinationBucket,
               file);
 
           completeMultipartUpload(destinationClient, destinationBucket, file, uploadId, completedParts);
@@ -131,7 +129,7 @@ public class Asynchro {
 
   private InputStream getObjectFromSource(
       S3AsyncClient sourceClient, String sourceBucket, String key) {
-    CompletableFuture<ResponseInputStream<GetObjectResponse>> getObjectResponseFuture =
+    var getObjectResponseFuture =
         sourceClient.getObject(
             GetObjectRequest.builder().bucket(sourceBucket).key(key).build(),
             AsyncResponseTransformer.toBlockingInputStream());
@@ -140,7 +138,7 @@ public class Asynchro {
 
   private String initiateMultipartUpload(
       S3AsyncClient destinationClient, String destinationBucket, S3ObjectRequest file) {
-    CompletableFuture<CreateMultipartUploadResponse> createResponseFuture =
+    var createResponseFuture =
         destinationClient.createMultipartUpload(
             CreateMultipartUploadRequest.builder().bucket(destinationBucket).key(file.key()).build());
     return createResponseFuture.join().uploadId();
@@ -154,16 +152,16 @@ public class Asynchro {
       S3ObjectRequest file) {
 
     List<CompletedPart> completedParts = new ArrayList<>();
-    byte[] buffer = new byte[(int) SIMPLE_UPLOAD_SIZE];
+    var buffer = new byte[(int) SIMPLE_UPLOAD_SIZE];
     int bytesRead;
     int partNumber = 1;
 
     try (InputStream autoCloseableInputStream = inputStream) {
       while ((bytesRead = autoCloseableInputStream.read(buffer)) > 0) {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
-        AsyncRequestBody requestBody = AsyncRequestBody.fromByteBuffer(byteBuffer);
+        var byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
+        var requestBody = AsyncRequestBody.fromByteBuffer(byteBuffer);
 
-        CompletableFuture<UploadPartResponse> uploadPartResponseFuture =
+        var uploadPartResponseFuture =
             destinationClient.uploadPart(
                 UploadPartRequest.builder()
                     .bucket(destinationBucket)
@@ -195,7 +193,7 @@ public class Asynchro {
       String uploadId,
       List<CompletedPart> completedParts) {
 
-    CompletableFuture<CompleteMultipartUploadResponse> completeResponseFuture =
+    var completeResponseFuture =
         destinationClient.completeMultipartUpload(
             CompleteMultipartUploadRequest.builder()
                 .bucket(destinationBucket)
@@ -234,7 +232,7 @@ public class Asynchro {
         simpleUploadSemaphore.acquire();
         Failsafe.with(retryPolicy).run(() -> {
           try {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+            var getObjectRequest = GetObjectRequest.builder()
                 .bucket(sourceBucketName)
                 .key(file.key())
                 .build();
@@ -243,7 +241,7 @@ public class Asynchro {
                 .getObject(getObjectRequest, AsyncResponseTransformer.toBytes())
                 .join();
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+            var putObjectRequest = PutObjectRequest.builder()
                 .bucket(destinationBucketName)
                 .key(file.key())
                 .build();
@@ -279,10 +277,10 @@ public class Asynchro {
         if (continuationToken != null) {
           listRequestBuilder.continuationToken(continuationToken);
         }
-        ListObjectsV2Request listRequest = listRequestBuilder.build();
-        ListObjectsV2Response listResponse = client.listObjectsV2(listRequest).join();
+        var listRequest = listRequestBuilder.build();
+        var listResponse = client.listObjectsV2(listRequest).join();
 
-        List<S3Object> contents = listResponse.contents();
+        var contents = listResponse.contents();
 
         contents.stream().filter(o -> !o.key().endsWith("/")).forEach(allObjects::add);
 
@@ -312,15 +310,15 @@ public class Asynchro {
   }
 
   private boolean doesBucketExist(String bucketName, S3AsyncClient client) throws Exception {
-    List<Bucket> buckets = client.listBuckets().get().buckets();
+    var buckets = client.listBuckets().get().buckets();
     return buckets.stream().anyMatch(bucket -> bucket.name().equals(bucketName));
   }
 
   private void enableVersioning(String bucketName, S3AsyncClient client) {
-    VersioningConfiguration versioningConfiguration =
+    var versioningConfiguration =
         VersioningConfiguration.builder().status(BucketVersioningStatus.ENABLED).build();
 
-    PutBucketVersioningRequest request =
+    var request =
         PutBucketVersioningRequest.builder()
             .bucket(bucketName)
             .versioningConfiguration(versioningConfiguration)
@@ -360,12 +358,12 @@ public class Asynchro {
 
   ///////////// client handling
   public List<BucketResponse> getBuckets(String client) {
-    S3AsyncClient chooseClient = checkClient(client);
+    var chooseClient = checkClient(client);
     return listBuckets(chooseClient);
   }
 
   public List<S3Object> getS3Objects(String bucketName, String client) {
-    S3AsyncClient client1 = checkClient(client);
+    var client1 = checkClient(client);
     return getS3Objects(bucketName, client1);
   }
 }
