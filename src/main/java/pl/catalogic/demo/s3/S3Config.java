@@ -9,13 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class S3Config {
+
   @Value("${aws.access.key.first}")
   private String awsAccessKey;
 
@@ -41,6 +40,8 @@ public class S3Config {
             StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(awsAccessKey, awsSecretAccessKey)))
         .forcePathStyle(true)
+        .overrideConfiguration(clientOverrides -> clientOverrides.apiCallTimeout(Duration.ofMinutes(2))
+            .apiCallAttemptTimeout(Duration.ofSeconds(30)))
         .build();
   }
 
@@ -56,6 +57,8 @@ public class S3Config {
                     awsAccessKeySecond,
                     awsSecretAccessKeySecond)))
         .forcePathStyle(true)
+        .overrideConfiguration(clientOverrides -> clientOverrides.apiCallTimeout(Duration.ofMinutes(2))
+            .apiCallAttemptTimeout(Duration.ofSeconds(30)))
         .build();
   }
 

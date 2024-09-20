@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -65,7 +66,7 @@ public class Asynchro {
     this.multipartUploadSemaphore = new Semaphore(4);
     this.retryPolicy = new RetryPolicy<>()
         .handle(Exception.class)
-        .withDelay(Duration.ofSeconds(30))
+        .withBackoff(10, 60, ChronoUnit.SECONDS)
         .withMaxRetries(5);
   }
 
@@ -127,7 +128,6 @@ public class Asynchro {
       }
     });
   }
-
 
   private InputStream getObjectFromSource(
       S3AsyncClient sourceClient, String sourceBucket, String key) {
