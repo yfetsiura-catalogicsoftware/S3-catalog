@@ -31,12 +31,11 @@ public class S3Config {
   @Value("${aws.s3.region}")
   private String region;
 
-  @Bean(name = "DataCore")
+  @Bean(name = "MiniPartner")
   public S3AsyncClient s3Client() {
     return S3AsyncClient.builder()
-//        .httpClientBuilder(NettyNioAsyncHttpClient.builder().maxConcurrency(7).connectionAcquisitionTimeout(Duration.ofSeconds(60)))
         .multipartEnabled(true)
-        .endpointOverride(URI.create("http://backup42:4285"))
+        .endpointOverride(URI.create("http://172.20.2.219:9000"))
         .region(Region.of(region))
         .credentialsProvider(
             StaticCredentialsProvider.create(
@@ -49,7 +48,6 @@ public class S3Config {
   public S3AsyncClient s3ClientForTester() {
     return S3AsyncClient.builder()
         .multipartEnabled(true)
-//        .httpClientBuilder(NettyNioAsyncHttpClient.builder().maxConcurrency(10).connectionAcquisitionTimeout(Duration.ofSeconds(60)))
         .endpointOverride(URI.create("http://172.20.2.121:9000"))
         .region(Region.of(region))
         .credentialsProvider(

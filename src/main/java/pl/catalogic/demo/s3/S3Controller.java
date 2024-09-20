@@ -1,6 +1,7 @@
 package pl.catalogic.demo.s3;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.catalogic.demo.s3.model.BucketResponse;
 import pl.catalogic.demo.s3.model.S3ObjectResponse;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 
 @RestController
 @RequestMapping("/api")
@@ -20,7 +22,7 @@ public class S3Controller {
   @GetMapping("/buckets/backup/{sourceBucket}/{fromTo}")
   public ResponseEntity<String> backup(@PathVariable String sourceBucket, @PathVariable String fromTo) {
     asynchro.transferBucket(sourceBucket,fromTo);
-    return ResponseEntity.ok("Backup started");
+    return ResponseEntity.ok("Backup started.");
   }
 
   @GetMapping("/buckets/{bucketName}/{client}")
@@ -38,4 +40,5 @@ public class S3Controller {
     List<BucketResponse> bucketResponses = asynchro.getBuckets(client);
     return ResponseEntity.ok(bucketResponses);
   }
+
 }
