@@ -296,7 +296,7 @@ public class Asynchro {
   public List<BucketResponse> listBuckets(S3AsyncClient client) {
     try {
       return client.listBuckets().join().buckets().stream()
-          .map(b -> new BucketResponse(b.name(), b.creationDate().toString()))
+          .map(b -> new BucketResponse(b.name()))
           .toList();
     } catch (Exception e) {
       logger.error("Failed to list buckets: " + e.getMessage());
