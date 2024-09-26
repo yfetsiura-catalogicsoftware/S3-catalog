@@ -2,65 +2,62 @@ package pl.catalogic.demo.s3;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
+import lombok.SneakyThrows;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import pl.catalogic.demo.s3.model.BucketCredentials;
 import pl.catalogic.demo.s3.model.BucketResponse;
+import pl.catalogic.demo.s3.model.S3BackupRequest;
 import pl.catalogic.demo.s3.model.S3ClientException;
+import pl.catalogic.demo.s3.model.S3Credentials;
 import pl.catalogic.demo.s3.model.S3ObjectRequest;
-import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.BucketVersioningStatus;
 import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
 import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request.Builder;
 import software.amazon.awssdk.services.s3.model.PutBucketVersioningRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
-import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 import software.amazon.awssdk.services.s3.model.VersioningConfiguration;
 
 @Service
 public class Asynchro {
 
-  private final S3AsyncClient s3Source;
-  private final S3AsyncClient s3Destination;
-  private static final long SIMPLE_UPLOAD_SIZE = 5 * 1024 * 1024;
+  private static final long SIMPLE_UPLOAD_SIZE = 50 * 1024 * 1024;
   private final Semaphore simpleUploadSemaphore;
   private final Semaphore multipartUploadSemaphore;
   private final RetryPolicy<Object> retryPolicy;
   private static final Logger logger =
       LoggerFactory.getLogger(Asynchro.class);
 
-  public Asynchro(
-      @Qualifier("MiniPartner") S3AsyncClient s3Source,
-      @Qualifier("MiniO") S3AsyncClient s3Destination) {
-    this.s3Source = s3Source;
-    this.s3Destination = s3Destination;
+  public Asynchro() {
     this.simpleUploadSemaphore = new Semaphore(10);
     this.multipartUploadSemaphore = new Semaphore(4);
     this.retryPolicy = new RetryPolicy<>()
@@ -70,38 +67,61 @@ public class Asynchro {
   }
 
   @Async
-  public void transferBucket(String sourceBucket, String fromTo) {
-    var clients = makeClientList(fromTo);
-    var files = getS3Objects(sourceBucket, clients.get(0)).stream()
+  public void backup(S3BackupRequest backupRequest) {
+    Instant start = Instant.now(); // Початок вимірювання часу
+    List<BucketCredentials> buckets = backupRequest.buckets();
+    for (BucketCredentials bucket : buckets) {
+        transferBuckets(bucket);
+    }
+
+  }
+  @SneakyThrows
+  private void transferBuckets(BucketCredentials bucketCredentials) {
+    Instant start = Instant.now(); // Початок вимірювання часу
+
+
+    S3AsyncClient sourceClient = createS3Client(bucketCredentials.sourceCredentials());
+    S3AsyncClient destinationClient = createS3Client(bucketCredentials.destinationCredentials());
+
+    if (!doesBucketExist(bucketCredentials.destinationCredentials().bucketName(), destinationClient)) {
+      createBucket(bucketCredentials.destinationCredentials().bucketName(), destinationClient);
+    }
+
+    List<S3ObjectRequest> list = getS3Objects(bucketCredentials.sourceCredentials().bucketName(), sourceClient).stream()
         .map(o -> new S3ObjectRequest(o.key(), o.size()))
         .toList();
 
-    var transferResults = new ArrayList<>();
+    var transferResults = new ArrayList<CompletableFuture<Void>>();
 
-    for (S3ObjectRequest file : files) {
+    for (S3ObjectRequest file : list) {
       CompletableFuture<Void> result;
       if (file.size() > SIMPLE_UPLOAD_SIZE) {
-        result = multipartUpload(clients.get(0), clients.get(1), sourceBucket, sourceBucket, file);
+        result = multipartUpload(sourceClient, destinationClient, bucketCredentials, file); // Асинхронна операція
       } else {
-        result = simpleUpload(clients.get(0), clients.get(1), sourceBucket, sourceBucket, file);
+        result = simpleUpload(sourceClient, destinationClient, bucketCredentials, file); // Асинхронна операція
       }
       transferResults.add(result);
     }
+
     CompletableFuture.allOf(transferResults.toArray(new CompletableFuture[0]))
-        .thenRun(() -> logger.info("Backup completed.Copied " + files.size() + " files"))
+        .thenRun(() -> logger.info("Backup completed. Copied " + list.size() + " files"))
         .exceptionally(ex -> {
-          logger.error("Backup is failed. " + ex.getMessage());
+          logger.error("Backup failed: " + ex.getMessage());
           return null;
         });
+    Instant end = Instant.now();
+    Duration timeElapsed = Duration.between(start, end);
+    logger.info("Backup completed in: " + timeElapsed.toSeconds() + " seconds.");
   }
+
+
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
   private CompletableFuture<Void> multipartUpload(
       S3AsyncClient sourceClient,
       S3AsyncClient destinationClient,
-      String sourceBucket,
-      String destinationBucket,
+      BucketCredentials bucketCredentials,
       S3ObjectRequest file) {
 
     return CompletableFuture.runAsync(() -> {
@@ -109,14 +129,14 @@ public class Asynchro {
         multipartUploadSemaphore.acquire();
 
         Failsafe.with(retryPolicy).run(() -> {
-          var inputStream = getObjectFromSource(sourceClient, sourceBucket, file.key());
+          var inputStream = getObjectFromSource(sourceClient, bucketCredentials.sourceCredentials().bucketName(), file.key());
 
-          var uploadId = initiateMultipartUpload(destinationClient, destinationBucket, file);
+          var uploadId = initiateMultipartUpload(destinationClient, bucketCredentials.destinationCredentials().bucketName(), file);
 
-          var completedParts = uploadParts(destinationClient, inputStream, uploadId, destinationBucket,
+          var completedParts = uploadParts(destinationClient, inputStream, uploadId, bucketCredentials.destinationCredentials().bucketName(),
               file);
 
-          completeMultipartUpload(destinationClient, destinationBucket, file, uploadId, completedParts);
+          completeMultipartUpload(destinationClient, bucketCredentials.destinationCredentials().bucketName(), file, uploadId, completedParts);
         });
       } catch (Exception e) {
         logger.error("Error multipart upload. " + e.getMessage());
@@ -223,8 +243,7 @@ public class Asynchro {
   private CompletableFuture<Void> simpleUpload(
       S3AsyncClient sourceClient,
       S3AsyncClient destinationClient,
-      String sourceBucketName,
-      String destinationBucketName,
+      BucketCredentials bucketCredentials,
       S3ObjectRequest file) {
 
     return CompletableFuture.runAsync(() -> {
@@ -233,7 +252,7 @@ public class Asynchro {
         Failsafe.with(retryPolicy).run(() -> {
           try {
             var getObjectRequest = GetObjectRequest.builder()
-                .bucket(sourceBucketName)
+                .bucket(bucketCredentials.sourceCredentials().bucketName())
                 .key(file.key())
                 .build();
 
@@ -242,7 +261,7 @@ public class Asynchro {
                 .join();
 
             var putObjectRequest = PutObjectRequest.builder()
-                .bucket(destinationBucketName)
+                .bucket(bucketCredentials.destinationCredentials().bucketName())
                 .key(file.key())
                 .build();
 
@@ -272,7 +291,7 @@ public class Asynchro {
     String continuationToken = null;
     try {
       do {
-        ListObjectsV2Request.Builder listRequestBuilder =
+        Builder listRequestBuilder =
             ListObjectsV2Request.builder().bucket(bucketName).maxKeys(1000);
         if (continuationToken != null) {
           listRequestBuilder.continuationToken(continuationToken);
@@ -339,31 +358,18 @@ public class Asynchro {
   }
 
   //////////////
-  private S3AsyncClient checkClient(String client) {
-    return client.equals("source") ? s3Source : s3Destination;
-  }
 
-  private List<S3AsyncClient> makeClientList(String fromTo) {
-    S3AsyncClient sourceClient;
-    S3AsyncClient destinationClient;
-    if (fromTo.equals("tominio")) {
-      sourceClient = s3Source;
-      destinationClient = s3Destination;
-    } else {
-      sourceClient = s3Destination;
-      destinationClient = s3Source;
-    }
-    return List.of(sourceClient, destinationClient);
-  }
-
-  ///////////// client handling
-  public List<BucketResponse> getBuckets(String client) {
-    var chooseClient = checkClient(client);
-    return listBuckets(chooseClient);
-  }
-
-  public List<S3Object> getS3Objects(String bucketName, String client) {
-    var client1 = checkClient(client);
-    return getS3Objects(bucketName, client1);
+  public S3AsyncClient createS3Client(S3Credentials credentials) {
+    return S3AsyncClient.builder()
+        .multipartEnabled(true)
+        .endpointOverride(URI.create(credentials.s3accessEndpoint()))
+        .region(Region.of(credentials.region()))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(credentials.accessKey(), credentials.secretKey())))
+        .forcePathStyle(true)
+        .overrideConfiguration(clientOverrides -> clientOverrides.apiCallTimeout(Duration.ofMinutes(2))
+            .apiCallAttemptTimeout(Duration.ofSeconds(30)))
+        .build();
   }
 }
