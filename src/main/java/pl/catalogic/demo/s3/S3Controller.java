@@ -20,7 +20,6 @@ import pl.catalogic.demo.s3.model.S3ObjectResponseVersion;
 @RequiredArgsConstructor
 public class S3Controller {
 
-  private final Asynchro asynchro;
   private final S3Service s3Service;
 
   @PostMapping("/buckets/backup")
@@ -29,15 +28,6 @@ public class S3Controller {
     return ResponseEntity.ok("Backup started.");
   }
 
-  @GetMapping("/buckets/{bucketName}/{client}")
-  public ResponseEntity<List<S3ObjectResponse>> listObjectsList(@PathVariable String bucketName, @PathVariable String client) {
-    List<S3ObjectResponse> list = asynchro.getS3Objects(bucketName, client).stream()
-        .map(
-            o -> new S3ObjectResponse(o.key(), o.lastModified().toString(), o.eTag(), o.size(),
-                o.storageClassAsString()))
-        .toList();
-    return ResponseEntity.ok(list);
-  }
 
   @PostMapping("/buckets")
   public ResponseEntity<List<BucketResponse>> listBuckets(@RequestBody S3Credentials credentials) {
