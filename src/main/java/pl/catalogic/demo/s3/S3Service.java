@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,30 +54,38 @@ public class S3Service {
   private static final long SIMPLE_UPLOAD_SIZE = 50 * 1024 * 1024;
 
   public S3Service() {
-    this.retryPolicy = new RetryPolicy<>()
-        .handle(Exception.class)
-        .withBackoff(30, 60, ChronoUnit.SECONDS)
-        .withMaxRetries(3);
+    this.retryPolicy =
+        new RetryPolicy<>()
+            .handle(Exception.class)
+            .withBackoff(30, 60, ChronoUnit.SECONDS)
+            .withMaxRetries(3);
   }
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(S3Service.class);
+  private static final Logger logger = LoggerFactory.getLogger(S3Service.class);
 
   @Async
   public void backup(S3BackupRequest backupRequest) {
+    Instant start = Instant.now();
+
     List<BucketCredentials> buckets = backupRequest.buckets();
 
     for (BucketCredentials bucket : buckets) {
       try {
         logger.info("Starting backup for bucket: " + bucket.sourceCredentials().bucketName());
         transferBuckets(bucket);
-        logger.info("Successfully completed backup for bucket: " + bucket.sourceCredentials().bucketName());
+        logger.info(
+            "Successfully completed backup for bucket: " + bucket.sourceCredentials().bucketName());
       } catch (Exception e) {
         logger.error(
-            "Backup failed for bucket: " + bucket.sourceCredentials().bucketName() + ", reason: " + e.getMessage());
+            "Backup failed for bucket: "
+                + bucket.sourceCredentials().bucketName()
+                + ", reason: "
+                + e.getMessage());
       }
     }
-
+    Instant end = Instant.now();
+    Duration timeElapsed = Duration.between(start, end);
+    logger.info("Backup completed in: " + timeElapsed.toSeconds() + " seconds.");
   }
 
   private void transferBuckets(BucketCredentials bucketCredentials) {
@@ -89,11 +98,11 @@ public class S3Service {
     List<S3Object> s3Objects = getS3Objects(bucketCredentials.sourceCredentials(), sourceClient);
 
     for (S3Object s3Object : s3Objects) {
-//      if (s3Object.size() > SIMPLE_UPLOAD_SIZE) {
-//        multipartUpload(sourceClient, destinationClient, bucketCredentials, s3Object);
-//      } else {
+      //      if (s3Object.size() > SIMPLE_UPLOAD_SIZE) {
+      //        multipartUpload(sourceClient, destinationClient, bucketCredentials, s3Object);
+      //      } else {
       simpleUpload(sourceClient, destinationClient, bucketCredentials, s3Object);
-//      }
+      //      }
     }
   }
 
@@ -104,38 +113,49 @@ public class S3Service {
       S3Object file) {
 
     try {
-      Failsafe.with(retryPolicy).run(() -> {
-        InputStream inputStream = getObjectFromSource(sourceClient, credentials.sourceCredentials().bucketName(),
-            file.key());
+      Failsafe.with(retryPolicy)
+          .run(
+              () -> {
+                InputStream inputStream =
+                    getObjectFromSource(
+                        sourceClient, credentials.sourceCredentials().bucketName(), file.key());
 
-        String uploadId = initiateMultipartUpload(destinationClient, credentials.destinationCredentials().bucketName(),
-            file.key());
+                String uploadId =
+                    initiateMultipartUpload(
+                        destinationClient,
+                        credentials.destinationCredentials().bucketName(),
+                        file.key());
 
-        List<CompletedPart> completedParts = uploadParts(destinationClient, inputStream, uploadId,
-            credentials.destinationCredentials().bucketName(), file);
+                List<CompletedPart> completedParts =
+                    uploadParts(
+                        destinationClient,
+                        inputStream,
+                        uploadId,
+                        credentials.destinationCredentials().bucketName(),
+                        file);
 
-        completeMultipartUpload(destinationClient, credentials.destinationCredentials().bucketName(), file, uploadId,
-            completedParts);
-      });
+                completeMultipartUpload(
+                    destinationClient,
+                    credentials.destinationCredentials().bucketName(),
+                    file,
+                    uploadId,
+                    completedParts);
+              });
     } catch (Exception e) {
       logger.error("Error during multipart upload: " + e.getMessage());
       throw new S3ClientException("Error during multipart upload: " + e.getMessage());
     }
   }
 
-  private InputStream getObjectFromSource(
-      S3Client sourceClient, String sourceBucket, String key) {
-    return sourceClient.getObject(
-        GetObjectRequest.builder().bucket(sourceBucket).key(key).build());
+  private InputStream getObjectFromSource(S3Client sourceClient, String sourceBucket, String key) {
+    return sourceClient.getObject(GetObjectRequest.builder().bucket(sourceBucket).key(key).build());
   }
 
   private String initiateMultipartUpload(
       S3Client destinationClient, String destinationBucket, String key) {
-    var createResponse = destinationClient.createMultipartUpload(
-        CreateMultipartUploadRequest.builder()
-            .bucket(destinationBucket)
-            .key(key)
-            .build());
+    var createResponse =
+        destinationClient.createMultipartUpload(
+            CreateMultipartUploadRequest.builder().bucket(destinationBucket).key(key).build());
     return createResponse.uploadId();
   }
 
@@ -165,21 +185,19 @@ public class S3Service {
       ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
       RequestBody requestBody = RequestBody.fromByteBuffer(byteBuffer);
 
-      UploadPartResponse uploadPartResponse = destinationClient.uploadPart(
-          UploadPartRequest.builder()
-              .bucket(destinationBucket)
-              .key(file.key())
-              .uploadId(uploadId)
-              .partNumber(partNumber)
-              .contentLength((long) bytesRead)
-              .build(),
-          requestBody);
+      UploadPartResponse uploadPartResponse =
+          destinationClient.uploadPart(
+              UploadPartRequest.builder()
+                  .bucket(destinationBucket)
+                  .key(file.key())
+                  .uploadId(uploadId)
+                  .partNumber(partNumber)
+                  .contentLength((long) bytesRead)
+                  .build(),
+              requestBody);
 
       completedParts.add(
-          CompletedPart.builder()
-              .partNumber(partNumber)
-              .eTag(uploadPartResponse.eTag())
-              .build());
+          CompletedPart.builder().partNumber(partNumber).eTag(uploadPartResponse.eTag()).build());
       partNumber++;
     }
 
@@ -190,8 +208,9 @@ public class S3Service {
 
   void isVersioning(S3Credentials credentials, String destinationBucket) {
     S3Client s3Client = createS3Client(credentials);
-    GetBucketVersioningResponse response = s3Client.getBucketVersioning(
-        GetBucketVersioningRequest.builder().bucket(destinationBucket).build());
+    GetBucketVersioningResponse response =
+        s3Client.getBucketVersioning(
+            GetBucketVersioningRequest.builder().bucket(destinationBucket).build());
 
     if (response.status() == BucketVersioningStatus.ENABLED) {
       System.out.println("Versioning is enabled");
@@ -209,11 +228,12 @@ public class S3Service {
     String versionIdMarker = null;
 
     do {
-      ListObjectVersionsRequest request = ListObjectVersionsRequest.builder()
-          .bucket(bucketName)
-          .keyMarker(keyMarker)
-          .versionIdMarker(versionIdMarker)
-          .build();
+      ListObjectVersionsRequest request =
+          ListObjectVersionsRequest.builder()
+              .bucket(bucketName)
+              .keyMarker(keyMarker)
+              .versionIdMarker(versionIdMarker)
+              .build();
 
       ListObjectVersionsResponse response = s3Client.listObjectVersions(request);
 
@@ -242,10 +262,21 @@ public class S3Service {
     if (!doesBucketExist(bucketCredentials.destinationCredentials(), destinationClient)) {
       createBucket(bucketCredentials.destinationCredentials(), destinationClient);
     }
-    List<S3ObjectResponseVersion> list = versioningList(bucketCredentials.sourceCredentials(),
-        bucketCredentials.sourceCredentials().bucketName()).stream().map(
-        o -> new S3ObjectResponseVersion(o.key(), o.eTag(), o.size(), o.versionId(), o.isLatest(),
-            o.lastModified().toString())).toList();
+    List<S3ObjectResponseVersion> list =
+        versioningList(
+                bucketCredentials.sourceCredentials(),
+                bucketCredentials.sourceCredentials().bucketName())
+            .stream()
+            .map(
+                o ->
+                    new S3ObjectResponseVersion(
+                        o.key(),
+                        o.eTag(),
+                        o.size(),
+                        o.versionId(),
+                        o.isLatest(),
+                        o.lastModified().toString()))
+            .toList();
 
     System.out.println(list);
 
@@ -254,27 +285,30 @@ public class S3Service {
     }
   }
 
-  private void simpleAllVers(S3Client sourceClient,
+  private void simpleAllVers(
+      S3Client sourceClient,
       S3Client destinationClient,
       BucketCredentials bucketCredentials,
       S3ObjectResponseVersion file) {
 
-    var getObjectRequest = GetObjectRequest.builder()
-        .bucket(bucketCredentials.sourceCredentials().bucketName())
-        .key(file.key())
-        .versionId(file.versionId())
-        .build();
+    var getObjectRequest =
+        GetObjectRequest.builder()
+            .bucket(bucketCredentials.sourceCredentials().bucketName())
+            .key(file.key())
+            .versionId(file.versionId())
+            .build();
 
     var objectBytes = sourceClient.getObjectAsBytes(getObjectRequest).asByteArray();
 
-    var putObjectRequest = PutObjectRequest.builder()
-        .bucket(bucketCredentials.destinationCredentials().bucketName())
-        .key(file.key())
-        .build();
+    var putObjectRequest =
+        PutObjectRequest.builder()
+            .bucket(bucketCredentials.destinationCredentials().bucketName())
+            .key(file.key())
+            .build();
 
     destinationClient.putObject(putObjectRequest, RequestBody.fromBytes(objectBytes));
-
   }
+
   //////////////////
 
   private void completeMultipartUpload(
@@ -300,10 +334,12 @@ public class S3Service {
               .uploadId(uploadId)
               .build());
       throw new S3ClientException(
-          "Failed to complete multipart upload for file: " + file.key() + ", Reason: " + e.getMessage());
+          "Failed to complete multipart upload for file: "
+              + file.key()
+              + ", Reason: "
+              + e.getMessage());
     }
   }
-
 
   private void simpleUpload(
       S3Client sourceClient,
@@ -311,28 +347,37 @@ public class S3Service {
       BucketCredentials bucketCredentials,
       S3Object file) {
 
-    Failsafe.with(retryPolicy).run(() -> {
-      try {
-        var getObjectRequest = GetObjectRequest.builder()
-            .bucket(bucketCredentials.sourceCredentials().bucketName())
-            .key(file.key())
-            .build();
+    Failsafe.with(retryPolicy)
+        .run(
+            () -> {
+              try {
+                var getObjectRequest =
+                    GetObjectRequest.builder()
+                        .bucket(bucketCredentials.sourceCredentials().bucketName())
+                        .key(file.key())
+                        .build();
 
-        var objectBytes = sourceClient.getObjectAsBytes(getObjectRequest).asByteArray();
+                var objectBytes = sourceClient.getObjectAsBytes(getObjectRequest).asByteArray();
 
-        var putObjectRequest = PutObjectRequest.builder()
-            .bucket(bucketCredentials.destinationCredentials().bucketName())
-            .key(file.key())
-            .build();
+                var putObjectRequest =
+                    PutObjectRequest.builder()
+                        .bucket(bucketCredentials.destinationCredentials().bucketName())
+                        .key(file.key())
+                        .build();
 
-        destinationClient.putObject(putObjectRequest, RequestBody.fromBytes(objectBytes));
-      } catch (Exception e) {
-        logger.error("Error during simple upload for file: " + file.key() + ", reason: " + e.getMessage());
-        throw new S3ClientException("Failed to upload file: " + file.key() + ", Reason: " + e.getMessage());
-      }
-    });
+                destinationClient.putObject(putObjectRequest, RequestBody.fromBytes(objectBytes));
+                logger.info("File copied: " + file.key() + ", size " + file.size());
+              } catch (Exception e) {
+                logger.error(
+                    "Error during simple upload for file: "
+                        + file.key()
+                        + ", reason: "
+                        + e.getMessage());
+                throw new S3ClientException(
+                    "Failed to upload file: " + file.key() + ", Reason: " + e.getMessage());
+              }
+            });
   }
-
 
   public List<S3Object> getS3Objects(S3Credentials credentials, S3Client client) {
     List<S3Object> allObjects = new ArrayList<>();
@@ -349,9 +394,7 @@ public class S3Service {
         var listResponse = client.listObjectsV2(listRequest);
         var contents = listResponse.contents();
 
-        contents.stream()
-            .filter(o -> !o.key().endsWith("/"))
-            .forEach(allObjects::add);
+        contents.stream().filter(o -> !o.key().endsWith("/")).forEach(allObjects::add);
 
         continuationToken = listResponse.nextContinuationToken();
       } while (continuationToken != null);
@@ -369,7 +412,8 @@ public class S3Service {
           .toList();
     } catch (Exception e) {
       logger.error("Failed to list buckets due to unexpected error: {}", e.getMessage());
-      throw new S3ClientException("Failed to list buckets due to unexpected error: " + e.getMessage());
+      throw new S3ClientException(
+          "Failed to list buckets due to unexpected error: " + e.getMessage());
     }
   }
 
@@ -394,7 +438,6 @@ public class S3Service {
     client.putBucketVersioning(request);
   }
 
-
   public S3Client createS3Client(S3Credentials credentials) {
     return S3Client.builder()
         .endpointOverride(URI.create(credentials.s3accessEndpoint()))
@@ -403,8 +446,11 @@ public class S3Service {
             StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(credentials.accessKey(), credentials.secretKey())))
         .forcePathStyle(true)
-        .overrideConfiguration(clientOverrides -> clientOverrides.apiCallTimeout(Duration.ofMinutes(2))
-            .apiCallAttemptTimeout(Duration.ofSeconds(30)))
+        .overrideConfiguration(
+            clientOverrides ->
+                clientOverrides
+                    .apiCallTimeout(Duration.ofMinutes(30))
+                    .apiCallAttemptTimeout(Duration.ofMinutes(5)))
         .build();
   }
 }
