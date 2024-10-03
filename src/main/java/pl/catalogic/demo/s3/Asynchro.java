@@ -10,6 +10,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import lombok.SneakyThrows;
 import net.jodah.failsafe.Failsafe;
@@ -56,6 +58,7 @@ public class Asynchro {
   private final RetryPolicy<Object> retryPolicy;
   private static final Logger logger =
       LoggerFactory.getLogger(Asynchro.class);
+  private ExecutorService executorService;
 
   public Asynchro() {
     this.simpleUploadSemaphore = new Semaphore(10);
@@ -64,21 +67,21 @@ public class Asynchro {
         .handle(Exception.class)
         .withBackoff(10, 60, ChronoUnit.SECONDS)
         .withMaxRetries(5);
+    executorService = Executors.newVirtualThreadPerTaskExecutor();
   }
 
   @Async
   public void backup(S3BackupRequest backupRequest) {
-    Instant start = Instant.now(); // Початок вимірювання часу
+    Instant start = Instant.now();
     List<BucketCredentials> buckets = backupRequest.buckets();
     for (BucketCredentials bucket : buckets) {
-        transferBuckets(bucket);
+      transferBuckets(bucket, start);
     }
 
   }
-  @SneakyThrows
-  private void transferBuckets(BucketCredentials bucketCredentials) {
-    Instant start = Instant.now(); // Початок вимірювання часу
 
+  @SneakyThrows
+  private void transferBuckets(BucketCredentials bucketCredentials, Instant start) {
 
     S3AsyncClient sourceClient = createS3Client(bucketCredentials.sourceCredentials());
     S3AsyncClient destinationClient = createS3Client(bucketCredentials.destinationCredentials());
@@ -96,24 +99,25 @@ public class Asynchro {
     for (S3ObjectRequest file : list) {
       CompletableFuture<Void> result;
       if (file.size() > SIMPLE_UPLOAD_SIZE) {
-        result = multipartUpload(sourceClient, destinationClient, bucketCredentials, file); // Асинхронна операція
+        result = CompletableFuture.runAsync(() -> multipartUpload(sourceClient, destinationClient, bucketCredentials, file).join(), executorService);
       } else {
-        result = simpleUpload(sourceClient, destinationClient, bucketCredentials, file); // Асинхронна операція
+        result = CompletableFuture.runAsync(() -> simpleUpload(sourceClient, destinationClient, bucketCredentials, file).join(), executorService);
       }
       transferResults.add(result);
     }
 
     CompletableFuture.allOf(transferResults.toArray(new CompletableFuture[0]))
-        .thenRun(() -> logger.info("Backup completed. Copied " + list.size() + " files"))
+        .thenRunAsync(() -> {
+          Instant end = Instant.now();
+          Duration timeElapsed = Duration.between(start, end);
+          logger.info("Backup completed. Copied " + list.size() + " files");
+          logger.info("Backup completed in: " + timeElapsed.toSeconds() + " seconds.");
+        }, executorService)
         .exceptionally(ex -> {
           logger.error("Backup failed: " + ex.getMessage());
           return null;
         });
-    Instant end = Instant.now();
-    Duration timeElapsed = Duration.between(start, end);
-    logger.info("Backup completed in: " + timeElapsed.toSeconds() + " seconds.");
   }
-
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,14 +133,18 @@ public class Asynchro {
         multipartUploadSemaphore.acquire();
 
         Failsafe.with(retryPolicy).run(() -> {
-          var inputStream = getObjectFromSource(sourceClient, bucketCredentials.sourceCredentials().bucketName(), file.key());
+          var inputStream = getObjectFromSource(sourceClient, bucketCredentials.sourceCredentials().bucketName(),
+              file.key());
 
-          var uploadId = initiateMultipartUpload(destinationClient, bucketCredentials.destinationCredentials().bucketName(), file);
+          var uploadId = initiateMultipartUpload(destinationClient,
+              bucketCredentials.destinationCredentials().bucketName(), file);
 
-          var completedParts = uploadParts(destinationClient, inputStream, uploadId, bucketCredentials.destinationCredentials().bucketName(),
+          var completedParts = uploadParts(destinationClient, inputStream, uploadId,
+              bucketCredentials.destinationCredentials().bucketName(),
               file);
 
-          completeMultipartUpload(destinationClient, bucketCredentials.destinationCredentials().bucketName(), file, uploadId, completedParts);
+          completeMultipartUpload(destinationClient, bucketCredentials.destinationCredentials().bucketName(), file,
+              uploadId, completedParts);
         });
       } catch (Exception e) {
         logger.error("Error multipart upload. " + e.getMessage());
@@ -368,8 +376,9 @@ public class Asynchro {
             StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(credentials.accessKey(), credentials.secretKey())))
         .forcePathStyle(true)
-        .overrideConfiguration(clientOverrides -> clientOverrides.apiCallTimeout(Duration.ofMinutes(2))
-            .apiCallAttemptTimeout(Duration.ofSeconds(30)))
+        .overrideConfiguration(clientBuilder -> clientBuilder
+            .apiCallTimeout(Duration.ofMinutes(30))
+            .apiCallAttemptTimeout(Duration.ofMinutes(5)))
         .build();
   }
 }
