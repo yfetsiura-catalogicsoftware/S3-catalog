@@ -13,24 +13,16 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class S3Config {
-  @Value("${aws.access.key}")
-  private String awsAccessKey;
-
-  @Value("${aws.secret.access.key}")
-  private String awsSecretAccessKey;
-
-  @Value("${aws.s3.region}")
-  private String region;
 
   @Bean(name = "s3ClientBackup")
   public S3Client s3Client() {
     return S3Client.builder()
-        .endpointOverride(URI.create("http://backup42:4285"))
-        .region(Region.of(region))
+        .endpointOverride(URI.create("https://192.168.129.192:9000"))
+        .region(Region.of("ua"))
         .credentialsProvider(
             StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(awsAccessKey, awsSecretAccessKey)))
-        .forcePathStyle(true)
+                AwsBasicCredentials.create("lTfY4rRyKg0XeJmFuNKJ", "WXn54jZPzDJb3eNbZPNXtZZ5lonUN4MJDOri790j")))
+        .forcePathStyle(false)
         .build();
   }
 
@@ -38,13 +30,13 @@ public class S3Config {
   public S3Client s3ClientForTester() {
     return S3Client.builder()
         .endpointOverride(URI.create("https://catalogic-demo.cloud.datacore.com/"))
-        .region(Region.of(region))
+        .region(Region.of("us"))
         .credentialsProvider(
             StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(
-                    "207eda0c56a27027e328a70388c0737f",
-                    "cMnGbfQ0cZrYNwZ8gZblTxc2fTbdRNGV3giz5AtA")))
-        .forcePathStyle(true)
+                    "ea3ddbd5e577e44ba05a3f3420045f49",
+                    "dsLtJ0A4o0xEPonba6c34G2DO93q1he4LjAoaUK4")))
+        .forcePathStyle(false)
         .build();
   }
 

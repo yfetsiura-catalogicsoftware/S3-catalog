@@ -4,15 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.catalogic.demo.s3.model.BucketDto;
@@ -20,7 +14,6 @@ import pl.catalogic.demo.s3.model.S3ObjectDto;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.Bucket;
@@ -62,8 +55,6 @@ import software.amazon.awssdk.services.s3.model.VersioningConfiguration;
 @Service
 public class S3Service {
 
-  @Value("${aws.s3.path.save}")
-  private String downloadDir;
 
   private final S3Client s3Client;
   private final S3Client s3ClientTester;
@@ -76,16 +67,23 @@ public class S3Service {
   }
 
   public List<BucketDto> listBucket() {
+    List<Bucket> buckets = s3ClientTester.listBuckets().buckets();
+    return buckets.stream()
+        .map(bucket -> new BucketDto(bucket.name(), bucket.creationDate().toString()))
+        .toList();
+  }
+
+  public List<BucketDto> listBucket2() {
     List<Bucket> buckets = s3Client.listBuckets().buckets();
     return buckets.stream()
-        .map(bucket -> new BucketDto(bucket.name(), bucket.creationDate()))
+        .map(bucket -> new BucketDto(bucket.name(), bucket.creationDate().toString()))
         .toList();
   }
 
   public List<BucketDto> listBucketTester() {
     List<Bucket> buckets = s3ClientTester.listBuckets().buckets();
     return buckets.stream()
-        .map(bucket -> new BucketDto(bucket.name(), bucket.creationDate()))
+        .map(bucket -> new BucketDto(bucket.name(), bucket.creationDate().toString()))
         .toList();
   }
 
@@ -110,11 +108,20 @@ public class S3Service {
     }
     s3ClientTester.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
     System.out.println("Bucket '" + bucketName + "' created successfully.");
-    enableVersioning(s3ClientTester,bucketName);
-    setLifecyclePolicy(s3ClientTester,bucketName);
+    enableVersioning(s3ClientTester, bucketName);
+    setLifecyclePolicy(s3ClientTester, bucketName);
   }
 
-  public List<S3ObjectDto> getAllObjects(String bucketName) {
+
+  public List<S3ObjectDto> showBucket(String bucketName, String who) {
+    if (who.equalsIgnoreCase("minio")) {
+      return getAllObjects(bucketName, s3Client);
+    } else {
+      return getAllObjects(bucketName, s3ClientTester);
+    }
+  }
+
+  public List<S3ObjectDto> getAllObjects(String bucketName, S3Client s3Client) {
     List<S3ObjectDto> objects = new ArrayList<>();
     try {
       List<S3Object> contents =
@@ -135,70 +142,6 @@ public class S3Service {
     return objects;
   }
 
-  public void downloadAllBuckets() {
-    List<Bucket> buckets = s3Client.listBuckets().buckets();
-
-    for (Bucket bucket : buckets) {
-      downloadBucket(bucket.name());
-    }
-  }
-
-  public void downloadBucket(String bucketName) {
-    List<S3Object> objects =
-        s3Client
-            .listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build())
-            .contents();
-
-    Set<String> directories = new HashSet<>();
-
-    // Collect all directory paths
-    for (S3Object object : objects) {
-      String key = object.key();
-      if (key.endsWith("/")) {
-        // If it's a directory, add to set
-        directories.add(key);
-      } else {
-        // Otherwise, add the directory path
-        int lastSlashIndex = key.lastIndexOf('/');
-        if (lastSlashIndex > 0) { // Ensure there's a '/' character and it's not at the start
-          String parentDir = key.substring(0, lastSlashIndex + 1); // Include the trailing '/'
-          directories.add(parentDir);
-        }
-      }
-    }
-
-    // Create all directories
-    for (String dir : directories) {
-      Path targetDir = Paths.get(downloadDir, bucketName, dir);
-      try {
-        Files.createDirectories(targetDir);
-        System.out.println("Created directory " + targetDir);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-
-    // Download all files
-    for (S3Object object : objects) {
-      if (!object.key().endsWith("/")) {
-        downloadObject(bucketName, object.key());
-      }
-    }
-  }
-
-  public void downloadObject(String bucketName, String key) {
-    GetObjectRequest getObjectRequest =
-        GetObjectRequest.builder().bucket(bucketName).key(key).build();
-    Path targetPath = Paths.get(downloadDir, bucketName, key);
-
-    try {
-      Files.createDirectories(targetPath.getParent());
-      s3Client.getObject(getObjectRequest, ResponseTransformer.toFile(targetPath));
-      System.out.println("Downloaded " + key + " to " + targetPath);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
 
   public void uploadObjectDirectly(String bucketName, MultipartFile multipartFile) {
     PutObjectRequest request =
