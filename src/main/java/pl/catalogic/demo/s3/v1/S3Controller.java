@@ -1,4 +1,4 @@
-package pl.catalogic.demo.s3;
+package pl.catalogic.demo.s3.v1;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import pl.catalogic.demo.s3.model.BucketDto;
-import pl.catalogic.demo.s3.model.ObjectInfoDto;
-import pl.catalogic.demo.s3.model.S3ObjectDto;
+import pl.catalogic.demo.s3.v1.model.BucketDto;
+import pl.catalogic.demo.s3.v1.model.ObjectInfoDto;
+import pl.catalogic.demo.s3.v1.model.S3ObjectDto;
 
 @RestController
 @RequestMapping("/api")

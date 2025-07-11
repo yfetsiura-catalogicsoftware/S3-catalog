@@ -1,4 +1,4 @@
-package pl.catalogic.demo.s3;
+package pl.catalogic.demo.s3.v1;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,8 +9,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import pl.catalogic.demo.s3.model.BucketDto;
-import pl.catalogic.demo.s3.model.S3ObjectDto;
+import pl.catalogic.demo.s3.v1.model.BucketDto;
+import pl.catalogic.demo.s3.v1.model.S3ObjectDto;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;

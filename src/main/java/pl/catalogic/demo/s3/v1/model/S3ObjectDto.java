@@ -1,4 +1,4 @@
-package pl.catalogic.demo.s3.model;
+package pl.catalogic.demo.s3.v1.model;
 
 import java.time.Instant;
 
