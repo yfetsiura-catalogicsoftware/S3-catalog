@@ -1,0 +1,88 @@
+[{
+  "_id": {"$oid": "67d2da7ae726d40229f042b7"},
+  "LogSize": 276,
+  "Message": "Backup for job ID: 9206f57c-835e-439d-9dc8-ace061be0ff2 has successfully started. Preparing sources and calculating the total backup size.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-13T13:15:36.657Z",
+  "JobInstanceId": "9206f57c-835e-439d-9dc8-ace061be0ff2"
+},
+{
+  "_id": {"$oid": "67d2da80e726d40229f042b8"},
+  "LogSize": 178,
+  "Message": "Starting the transfer of bucket: \"s3-13-03\". Transfer data size: 22728322 bytes (0.02 GB)",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-13T13:15:43.973Z",
+  "JobInstanceId": "9206f57c-835e-439d-9dc8-ace061be0ff2"
+},
+{
+  "_id": {"$oid": "67d2daa7e726d40229f042b9"},
+  "LogSize": 114,
+  "Message": "Recovery point created with id 67d2daa6bef271788fe0f5cb.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-13T13:16:22.952Z",
+  "JobInstanceId": "9206f57c-835e-439d-9dc8-ace061be0ff2"
+},
+{
+  "_id": {"$oid": "67d2daa7e726d40229f042ba"},
+  "LogSize": 114,
+  "Message": "Successfully transferred bucket \"s3-13-03\" to volume 111.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-13T13:16:22.953Z",
+  "JobInstanceId": "9206f57c-835e-439d-9dc8-ace061be0ff2"
+},
+{
+  "_id": {"$oid": "67d2daa7e726d40229f042bb"},
+  "LogSize": 166,
+  "Message": "Backup for job ID: 9206f57c-835e-439d-9dc8-ace061be0ff2 has successfully COMPLETED.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-13T13:16:23.018Z",
+  "JobInstanceId": "9206f57c-835e-439d-9dc8-ace061be0ff2"
+},
+{
+  "_id": {"$oid": "67da833412ccd90e0acb902e"},
+  "LogSize": 114,
+  "Message": "Recovery point created with id 67da83315e92ce7345527d21.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-19T08:41:22.765Z",
+  "JobInstanceId": "4ea7b033-0ae6-478e-98b6-7009ec131e4c"
+},
+{
+  "_id": {"$oid": "67da833412ccd90e0acb902f"},
+  "LogSize": 114,
+  "Message": "Successfully transferred bucket \"s3-13-03\" to volume 111.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-19T08:41:22.766Z",
+  "JobInstanceId": "4ea7b033-0ae6-478e-98b6-7009ec131e4c"
+},
+{
+  "_id": {"$oid": "67da833412ccd90e0acb9030"},
+  "LogSize": 166,
+  "Message": "Backup for job ID: 4ea7b033-0ae6-478e-98b6-7009ec131e4c has successfully COMPLETED.",
+  "MessageCode": "INFO",
+  "Module": "CatalogService",
+  "Offset": 0,
+  "SourceIP": "/dpx-catalog-1",
+  "Time": "2025-03-19T08:41:23.481Z",
+  "JobInstanceId": "4ea7b033-0ae6-478e-98b6-7009ec131e4c"
+}]

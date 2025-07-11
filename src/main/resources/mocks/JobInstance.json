@@ -1,0 +1,1635 @@
+[
+  {
+    "_id": "12028f4a-7210-4e5e-8f54-57fc8401e7eb",
+    "JobName": "s3back",
+    "JobDisplayName": "s3back",
+    "JobInstanceType": "S3_BACKUP",
+    "JobInstanceTypeGrouping": "S3_BACKUP",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "035e586dbf75",
+    "CreationTime": "2025-03-11T13:59:55.3810000Z",
+    "StartTime": "2025-03-11T14:00:00.5250000Z",
+    "EndTime": "2025-03-11T14:00:24.2900000Z",
+    "RetentionDays": 90,
+    "CatalogCompleted": false,
+    "Duration": 23765,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "d9a89f80-b60f-4e94-b356-3d0ff0f330a0",
+      "Folder": "SS_DEFAULT",
+      "Name": "s3back",
+      "Type": "S3_BACKUP",
+      "CreationTime": "2025-03-11T13:59:53.4270000Z",
+      "Options": [],
+      "Steps": [],
+      "RetentionDays": 90
+    },
+    "S3BackupJob": {
+      "_id": "d9a89f80-b60f-4e94-b356-3d0ff0f330a0",
+      "CreationTime": "2025-03-11T13:59:53.4270000Z",
+      "Name": "s3back",
+      "Folder": "SS_DEFAULT",
+      "BackupSources": [
+        {
+          "NodeId": "67d033a816aa2a192b9d2751",
+          "NodeName": "Datacore-Cloud",
+          "Buckets": [
+            "fets-bucket"
+          ],
+          "AllBucketsAreBackupTarget": false
+        }
+      ],
+      "BackupDestination": {
+        "NodeId": "vstor-172.26.0.95",
+        "NodeName": "vstor-172.26.0.95",
+        "PoolName": "primary"
+      },
+      "BackupRetention": {
+        "Days": 90
+      }
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "3303b1a5-72b7-43e8-befb-c90d523c6258",
+    "JobName": "multivmrestore",
+    "JobDisplayName": "multivmrestore",
+    "JobInstanceType": "MULTI_VM_RESTORE",
+    "JobInstanceTypeGrouping": "VMWARE_RESTORE",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "035e586dbf75",
+    "CreationTime": "2025-03-12T13:06:51.1500000Z",
+    "StartTime": "2025-03-12T13:06:51.1810000Z",
+    "EndTime": "2025-03-12T13:06:59.0440000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 7863,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "FAILED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "55b0d7f7-4ab2-472f-a3e2-721485ccd471",
+      "Folder": "SS_DEFAULT",
+      "Name": "multivmrestore",
+      "Type": "MULTI_VM_RESTORE",
+      "CreationTime": "2025-03-12T13:04:00.1110000Z",
+      "ModificationTime": "2025-03-12T13:06:40.8810000Z",
+      "Options": [
+        {
+          "Name": "node_name",
+          "Value": "vpl4"
+        },
+        {
+          "Name": "placement_id",
+          "Value": "host-6086"
+        },
+        {
+          "Name": "placement_name",
+          "Value": "pl-esxi-10"
+        },
+        {
+          "Name": "placement_type",
+          "Value": "HOST"
+        },
+        {
+          "Name": "folder_id",
+          "Value": "group-v3008"
+        },
+        {
+          "Name": "folder_name",
+          "Value": "dmilczarek"
+        },
+        {
+          "Name": "network_id",
+          "Value": "network-6003"
+        },
+        {
+          "Name": "network_name",
+          "Value": "V27"
+        },
+        {
+          "Name": "datastore_id",
+          "Value": "datastore-1004"
+        },
+        {
+          "Name": "datastore_name",
+          "Value": "VSTOR_PL_NFS_SHARE_VPL4"
+        },
+        {
+          "Name": "use_original_mac_address",
+          "Value": "False"
+        },
+        {
+          "Name": "notification_mode",
+          "Value": "NO_NOTIFICATIONS"
+        },
+        {
+          "Name": "notification_email_to"
+        },
+        {
+          "Name": "notification_email_cc"
+        },
+        {
+          "Name": "notification_email_bcc"
+        },
+        {
+          "Name": "notification_email_subject"
+        },
+        {
+          "Name": "power_on_vm_after_creation",
+          "Value": "False"
+        },
+        {
+          "Name": "allow_alternate_secondary_usage",
+          "Value": "False"
+        },
+        {
+          "Name": "vm_name_prefix"
+        }
+      ],
+      "Steps": [],
+      "RetentionDays": 0
+    },
+    "DefinitionExtensions": {
+      "_id": "55b0d7f7-4ab2-472f-a3e2-721485ccd471",
+      "VmsArray": [
+        {
+          "Guid": "5029175b-b039-2f91-e521-9318f5afb1aa",
+          "Order": 0,
+          "UseLatest": true,
+          "VcenterNodeName": "vpl4",
+          "VmName": "dmilczarek-dpx-rc2-4-12-1"
+        }
+      ],
+      "NetworkRules": []
+    },
+    "RestoreDestination": {
+      "NodeName": "vpl4",
+      "Placement": {
+        "_id": "host-6086",
+        "Type": "HOST",
+        "Name": "pl-esxi-10"
+      },
+      "Folder": {
+        "_id": "group-v3008",
+        "Name": "dmilczarek"
+      },
+      "Network": {
+        "_id": "network-6003",
+        "Name": "V27"
+      },
+      "Datastore": {
+        "_id": "datastore-1004",
+        "Name": "VSTOR_PL_NFS_SHARE_VPL4"
+      }
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "3d33472f-b085-4644-a21e-d74a579e2747",
+    "JobName": "hyper-v-back",
+    "JobDisplayName": "hyper-v-back",
+    "JobInstanceType": "BACKUP_VIRTUALIZATION_HYPERV",
+    "JobInstanceTypeGrouping": "HYPERV_BACKUP",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-11T14:10:38.4850000Z",
+    "StartTime": "2025-03-11T14:10:41.2900000Z",
+    "EndTime": "2025-03-11T14:12:32.2540000Z",
+    "RetentionDays": 30,
+    "CatalogCompleted": false,
+    "Duration": 110964,
+    "TotalData": 21474836480,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "FAILED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "46751030-7fa4-4aad-9f91-0bc2e3cb1838",
+      "Folder": "samplefolder2",
+      "Name": "hyper-v-back",
+      "Type": "BACKUP_VIRTUALIZATION_HYPERV",
+      "Comment": "Hyperv backup description",
+      "CreationTime": "2025-03-11T14:10:10.2730000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script"
+        },
+        {
+          "Name": "post_job_script"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "OPERATORMAILADDR",
+          "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+        },
+        {
+          "Name": "VM_BACKUP_IF_DPX_INSTALLED",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_CREATE_FH",
+          "Value": "false"
+        },
+        {
+          "Name": "JOB_VIEW_MODE",
+          "Value": "H"
+        },
+        {
+          "Name": "SSL_ENCRYPT",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_PROXY_SRV"
+        },
+        {
+          "Name": "VM_SKIP_UNSUPPORTED",
+          "Value": "true"
+        },
+        {
+          "Name": "VMW_FH_DEFERRED_INT",
+          "Value": "0"
+        },
+        {
+          "Name": "VM_QUIESCE",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "hv5",
+                "Name": "hv5",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "13FEC2A0-0C5A-4A07-B4C0-5AEE6DC797A9",
+                    "Name": "hv5-vm1",
+                    "Type": "VM",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "primary",
+                    "Name": "primary",
+                    "Type": "VSTOR_POOL",
+                    "Children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "TransferPathsExclusion": {
+            "ExclusionPatternEntries": [],
+            "ExclusionEntries": []
+          }
+        }
+      ],
+      "RetentionDays": 30
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "4f16c041-aa6d-4049-b119-5f2a3fcc3fc7",
+    "JobName": "s3restore-2025-03-11_13-00-46",
+    "JobDisplayName": "s3restore-2025-03-11_13-00-46",
+    "JobInstanceType": "S3_RESTORE",
+    "JobInstanceTypeGrouping": "S3_RESTORE",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "035e586dbf75",
+    "CreationTime": "2025-03-11T14:00:47.9850000Z",
+    "StartTime": "2025-03-11T14:00:48.0770000Z",
+    "EndTime": "2025-03-11T14:01:09.0320000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 20955,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "3b37999f-6583-48fa-b0a2-db58dc5ea830",
+      "Folder": "SS_DEFAULT",
+      "Name": "s3restore-2025-03-11_13-00-46",
+      "Type": "S3_RESTORE",
+      "CreationTime": "2025-03-11T14:00:46.2720000Z",
+      "Options": [
+        {
+          "Name": "delete_job_on_success",
+          "Value": "false"
+        }
+      ],
+      "Steps": [],
+      "RetentionDays": 0
+    },
+    "S3RestoreDetails": {
+      "Source": [
+        {
+          "NodeId": "67d033a816aa2a192b9d2751",
+          "NodeName": "Datacore-Cloud",
+          "Buckets": [
+            {
+              "Name": "fets-bucket",
+              "UseLatest": true
+            }
+          ]
+        }
+      ],
+      "Destination": {
+        "NodeId": "67d033a816aa2a192b9d2751",
+        "NodeName": "Datacore-Cloud"
+      },
+      "Options": {
+        "AutogenerateJobName": true,
+        "DeleteRestoreJobWhenCompleted": false
+      }
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "5a00edde-db38-4812-b40f-a5c0372c682b",
+    "JobName": "hyper-v-back",
+    "JobDisplayName": "hyper-v-back",
+    "JobInstanceType": "BACKUP_VIRTUALIZATION_HYPERV",
+    "JobInstanceTypeGrouping": "HYPERV_BACKUP",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-11T16:09:00.5000000Z",
+    "StartTime": "2025-03-11T16:09:00.7160000Z",
+    "EndTime": "2025-03-11T16:09:46.7830000Z",
+    "RetentionDays": 30,
+    "CatalogCompleted": false,
+    "Duration": 46067,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "46751030-7fa4-4aad-9f91-0bc2e3cb1838",
+      "Folder": "samplefolder2",
+      "Name": "hyper-v-back",
+      "Type": "BACKUP_VIRTUALIZATION_HYPERV",
+      "Comment": "Hyperv backup description",
+      "CreationTime": "2025-03-11T14:10:10.2730000Z",
+      "ModificationTime": "2025-03-11T14:21:15.6550000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script",
+          "Value": "null"
+        },
+        {
+          "Name": "post_job_script",
+          "Value": "null"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "OPERATORMAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "VM_BACKUP_IF_DPX_INSTALLED",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_CREATE_FH",
+          "Value": "false"
+        },
+        {
+          "Name": "JOB_VIEW_MODE",
+          "Value": "H"
+        },
+        {
+          "Name": "SSL_ENCRYPT",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_PROXY_SRV",
+          "Value": "null"
+        },
+        {
+          "Name": "VM_SKIP_UNSUPPORTED",
+          "Value": "true"
+        },
+        {
+          "Name": "VMW_FH_DEFERRED_INT",
+          "Value": "0"
+        },
+        {
+          "Name": "VM_QUIESCE",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "pl-hprv-1",
+                "Name": "pl-hprv-1",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "EB58D12B-D8B4-43F9-A68E-1CBDEC77973D",
+                    "Name": "dmilczarek-empty-vm",
+                    "Type": "VM",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "primary",
+                    "Name": "primary",
+                    "Type": "VSTOR_POOL",
+                    "Children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "TransferPathsExclusion": {
+            "ExclusionPatternEntries": [],
+            "ExclusionEntries": []
+          }
+        }
+      ],
+      "RetentionDays": 30
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "5c099892-2eed-4a12-8d14-3f97df43bc89",
+    "JobName": "hyperrestore",
+    "JobDisplayName": "hyperrestore",
+    "JobInstanceType": "RESTORE_VIRTUALIZATION_HYPERV",
+    "JobInstanceTypeGrouping": "HYPERV_RESTORE",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-11T14:26:16.2000000Z",
+    "StartTime": "2025-03-11T14:26:16.4780000Z",
+    "EndTime": "2025-03-11T14:32:25.0570000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 368579,
+    "TotalData": 10737418240,
+    "CompletedData": 10737418240,
+    "Throughput": 29132611,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "6786bce6-fa61-43d2-bebe-54384430e37b",
+      "Folder": "SS_DEFAULT",
+      "Name": "hyperrestore",
+      "Type": "RESTORE_VIRTUALIZATION_HYPERV",
+      "CreationTime": "2025-03-11T14:26:11.1750000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script"
+        },
+        {
+          "Name": "post_job_script"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "USE_LATEST_RECOVERY_POINT",
+          "Value": "false"
+        },
+        {
+          "Name": "delete_vm_if_exists",
+          "Value": "false"
+        },
+        {
+          "Name": "delete_job_on_success",
+          "Value": "true"
+        },
+        {
+          "Name": "restore_mode",
+          "Value": "FULL"
+        },
+        {
+          "Name": "virtual_machine_name",
+          "Value": "null"
+        },
+        {
+          "Name": "power_on_vm_after_creation",
+          "Value": "false"
+        },
+        {
+          "Name": "virtual_machine_UUID",
+          "Value": "EB58D12B-D8B4-43F9-A68E-1CBDEC77973D"
+        },
+        {
+          "Name": "restore_to_original_location",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {}
+          ]
+        }
+      ],
+      "RetentionDays": 0,
+      "RecoveryPointId": "67d0395116aa2a192b9d2753"
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "6bb7a735-aa46-4d8c-82c6-38266327cedc",
+    "JobName": "gfr-1741789404828",
+    "JobDisplayName": "gfr-1741789404828",
+    "JobInstanceType": "RESTORE_FILE_VMWARE",
+    "JobInstanceTypeGrouping": "FILE/RESTORE",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-12T15:23:21.8950000Z",
+    "StartTime": "2025-03-12T15:23:22.0930000Z",
+    "EndTime": "2025-03-12T15:27:39.6470000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 257554,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "dd047ecd-8008-46ad-abff-3dfef82164d6",
+      "Folder": "SS_DEFAULT",
+      "Name": "gfr-1741789404828",
+      "Type": "RESTORE_FILE_VMWARE",
+      "CreationTime": "2025-03-12T15:23:17.6870000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script"
+        },
+        {
+          "Name": "post_job_script"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "USE_LATEST_RECOVERY_POINT",
+          "Value": "false"
+        },
+        {
+          "Name": "delete_vm_if_exists",
+          "Value": "false"
+        },
+        {
+          "Name": "delete_job_on_success",
+          "Value": "true"
+        },
+        {
+          "Name": "restore_mode",
+          "Value": "GRANULAR"
+        },
+        {
+          "Name": "virtual_machine_name",
+          "Value": "null"
+        },
+        {
+          "Name": "power_on_vm_after_creation",
+          "Value": "false"
+        },
+        {
+          "Name": "virtual_machine_UUID",
+          "Value": "5029175b-b039-2f91-e521-9318f5afb1aa"
+        },
+        {
+          "Name": "restore_to_original_location",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "SSSV_vpl4_vmback.1741700269",
+                    "Name": "SSSV_vpl4_vmback.1741700269",
+                    "Type": "VSTOR_SNAPSHOT",
+                    "Children": [
+                      {
+                        "_id": "[vmback]vpl4@86822A42",
+                        "Name": "[vmback]vpl4@86822A42",
+                        "Type": "FILE_SYSTEM_PATH",
+                        "Children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "RetentionDays": 0,
+      "RecoveryPointId": "1741700269.2"
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "7bbb1b20-8b6d-4e2e-9b0c-8465f94fd397",
+    "JobName": "hyper-v-back",
+    "JobDisplayName": "hyper-v-back",
+    "JobInstanceType": "BACKUP_VIRTUALIZATION_HYPERV",
+    "JobInstanceTypeGrouping": "HYPERV_BACKUP",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-11T14:14:11.4900000Z",
+    "StartTime": "2025-03-11T14:14:11.7350000Z",
+    "EndTime": "2025-03-11T14:16:55.9860000Z",
+    "RetentionDays": 30,
+    "CatalogCompleted": false,
+    "Duration": 164251,
+    "TotalData": 21474836480,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "FAILED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "46751030-7fa4-4aad-9f91-0bc2e3cb1838",
+      "Folder": "samplefolder2",
+      "Name": "hyper-v-back",
+      "Type": "BACKUP_VIRTUALIZATION_HYPERV",
+      "Comment": "Hyperv backup description",
+      "CreationTime": "2025-03-11T14:10:10.2730000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script"
+        },
+        {
+          "Name": "post_job_script"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "OPERATORMAILADDR",
+          "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+        },
+        {
+          "Name": "VM_BACKUP_IF_DPX_INSTALLED",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_CREATE_FH",
+          "Value": "false"
+        },
+        {
+          "Name": "JOB_VIEW_MODE",
+          "Value": "H"
+        },
+        {
+          "Name": "SSL_ENCRYPT",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_PROXY_SRV"
+        },
+        {
+          "Name": "VM_SKIP_UNSUPPORTED",
+          "Value": "true"
+        },
+        {
+          "Name": "VMW_FH_DEFERRED_INT",
+          "Value": "0"
+        },
+        {
+          "Name": "VM_QUIESCE",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "hv5",
+                "Name": "hv5",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "13FEC2A0-0C5A-4A07-B4C0-5AEE6DC797A9",
+                    "Name": "hv5-vm1",
+                    "Type": "VM",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "primary",
+                    "Name": "primary",
+                    "Type": "VSTOR_POOL",
+                    "Children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "TransferPathsExclusion": {
+            "ExclusionPatternEntries": [],
+            "ExclusionEntries": []
+          }
+        }
+      ],
+      "RetentionDays": 30
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "839201da-2a13-4105-b158-c973635e2cd1",
+    "JobName": "hyper-v-back",
+    "JobDisplayName": "hyper-v-back",
+    "JobInstanceType": "BACKUP_VIRTUALIZATION_HYPERV",
+    "JobInstanceTypeGrouping": "HYPERV_BACKUP",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-12T16:09:00.0690000Z",
+    "StartTime": "2025-03-12T16:09:00.2530000Z",
+    "EndTime": "2025-03-12T16:09:53.9650000Z",
+    "RetentionDays": 30,
+    "CatalogCompleted": false,
+    "Duration": 53712,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "46751030-7fa4-4aad-9f91-0bc2e3cb1838",
+      "Folder": "samplefolder2",
+      "Name": "hyper-v-back",
+      "Type": "BACKUP_VIRTUALIZATION_HYPERV",
+      "Comment": "Hyperv backup description",
+      "CreationTime": "2025-03-11T14:10:10.2730000Z",
+      "ModificationTime": "2025-03-11T14:21:15.6550000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script",
+          "Value": "null"
+        },
+        {
+          "Name": "post_job_script",
+          "Value": "null"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "OPERATORMAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "VM_BACKUP_IF_DPX_INSTALLED",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_CREATE_FH",
+          "Value": "false"
+        },
+        {
+          "Name": "JOB_VIEW_MODE",
+          "Value": "H"
+        },
+        {
+          "Name": "SSL_ENCRYPT",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_PROXY_SRV",
+          "Value": "null"
+        },
+        {
+          "Name": "VM_SKIP_UNSUPPORTED",
+          "Value": "true"
+        },
+        {
+          "Name": "VMW_FH_DEFERRED_INT",
+          "Value": "0"
+        },
+        {
+          "Name": "VM_QUIESCE",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "pl-hprv-1",
+                "Name": "pl-hprv-1",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "EB58D12B-D8B4-43F9-A68E-1CBDEC77973D",
+                    "Name": "dmilczarek-empty-vm",
+                    "Type": "VM",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "primary",
+                    "Name": "primary",
+                    "Type": "VSTOR_POOL",
+                    "Children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "TransferPathsExclusion": {
+            "ExclusionPatternEntries": [],
+            "ExclusionEntries": []
+          }
+        }
+      ],
+      "RetentionDays": 30
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "8d37ba1a-5a3b-4de4-8afa-9e008291ec29",
+    "JobName": "multivmrestore",
+    "JobDisplayName": "multivmrestore",
+    "JobInstanceType": "MULTI_VM_RESTORE",
+    "JobInstanceTypeGrouping": "VMWARE_RESTORE",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "035e586dbf75",
+    "CreationTime": "2025-03-12T13:04:01.5320000Z",
+    "StartTime": "2025-03-12T13:04:01.7130000Z",
+    "EndTime": "2025-03-12T13:04:13.8310000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 12118,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "FAILED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "55b0d7f7-4ab2-472f-a3e2-721485ccd471",
+      "Folder": "SS_DEFAULT",
+      "Name": "multivmrestore",
+      "Type": "MULTI_VM_RESTORE",
+      "CreationTime": "2025-03-12T13:04:00.1110000Z",
+      "Options": [
+        {
+          "Name": "node_name",
+          "Value": "vpl4"
+        },
+        {
+          "Name": "placement_id",
+          "Value": "host-6086"
+        },
+        {
+          "Name": "placement_name",
+          "Value": "pl-esxi-10"
+        },
+        {
+          "Name": "placement_type",
+          "Value": "HOST"
+        },
+        {
+          "Name": "folder_id",
+          "Value": "group-v3008"
+        },
+        {
+          "Name": "folder_name",
+          "Value": "dmilczarek"
+        },
+        {
+          "Name": "network_id",
+          "Value": "network-6003"
+        },
+        {
+          "Name": "network_name",
+          "Value": "V27"
+        },
+        {
+          "Name": "datastore_id",
+          "Value": "datastore-1004"
+        },
+        {
+          "Name": "datastore_name",
+          "Value": "VSTOR_PL_NFS_SHARE_VPL4"
+        },
+        {
+          "Name": "use_original_mac_address",
+          "Value": "False"
+        },
+        {
+          "Name": "notification_mode",
+          "Value": "DEFAULT_NOTIFICATION"
+        },
+        {
+          "Name": "notification_email_to"
+        },
+        {
+          "Name": "notification_email_cc"
+        },
+        {
+          "Name": "notification_email_bcc"
+        },
+        {
+          "Name": "notification_email_subject"
+        },
+        {
+          "Name": "power_on_vm_after_creation",
+          "Value": "False"
+        },
+        {
+          "Name": "allow_alternate_secondary_usage",
+          "Value": "False"
+        },
+        {
+          "Name": "vm_name_prefix"
+        }
+      ],
+      "Steps": [],
+      "RetentionDays": 0
+    },
+    "DefinitionExtensions": {
+      "_id": "55b0d7f7-4ab2-472f-a3e2-721485ccd471",
+      "VmsArray": [
+        {
+          "Guid": "5029175b-b039-2f91-e521-9318f5afb1aa",
+          "Order": 0,
+          "UseLatest": true,
+          "VcenterNodeName": "vpl4",
+          "VmName": "dmilczarek-dpx-rc2-4-12-1"
+        }
+      ],
+      "NetworkRules": []
+    },
+    "RestoreDestination": {
+      "NodeName": "vpl4",
+      "Placement": {
+        "_id": "host-6086",
+        "Type": "HOST",
+        "Name": "pl-esxi-10"
+      },
+      "Folder": {
+        "_id": "group-v3008",
+        "Name": "dmilczarek"
+      },
+      "Network": {
+        "_id": "network-6003",
+        "Name": "V27"
+      },
+      "Datastore": {
+        "_id": "datastore-1004",
+        "Name": "VSTOR_PL_NFS_SHARE_VPL4"
+      }
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "b5051922-c2f5-4da1-ad6e-115a69e6584e",
+    "JobName": "gfr-1741789337887",
+    "JobDisplayName": "gfr-1741789337887",
+    "JobInstanceType": "RESTORE_FILE_HYPERV",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-12T15:22:15.8540000Z",
+    "StartTime": "2025-03-12T15:22:16.1680000Z",
+    "EndTime": "2025-03-12T15:22:19.1860000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 3027,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "FAILED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "84d90134-653f-4dea-ae5c-57757770283c",
+      "Folder": "Backup Jobs",
+      "Name": "Daily Backup Job",
+      "Type": "MULTI_VM_RESTORE",
+      "Comment": "This is a daily backup job for all production servers",
+      "CreationTime": "2025-03-12T13:06:00.1110000Z",
+      "ModificationTime": "2026-03-12T13:06:00.1110000Z",
+      "ProtectionTime": "2027-03-12T13:06:00.1110000Z",
+      "creator": "admin",
+      "Options": [
+        {
+          "Name": "node_name",
+          "Value": "vcenter-01"
+        },
+        {
+          "Name": "placement_id",
+          "Value": "cluster-123"
+        },
+        {
+          "Name": "placement_name",
+          "Value": "Production Cluster"
+        },
+        {
+          "Name": "placement_type",
+          "Value": "CLUSTER"
+        },
+        {
+          "Name": "folder_id",
+          "Value": "folder-456"
+        },
+        {
+          "Name": "folder_name",
+          "Value": "VM Backups"
+        },
+        {
+          "Name": "network_id",
+          "Value": "network-789"
+        },
+        {
+          "Name": "network_name",
+          "Value": "Production Network"
+        },
+        {
+          "Name": "datastore_id",
+          "Value": "datastore-012"
+        },
+        {
+          "Name": "datastore_name",
+          "Value": "SSD-Storage-01"
+        },
+        {
+          "Name": "use_original_mac_address",
+          "Value": "true"
+        },
+        {
+          "Name": "notification_mode",
+          "Value": "CUSTOM_NOTIFICATION"
+        },
+        {
+          "Name": "notification_email_to",
+          "Value": "admin@example.com"
+        },
+        {
+          "Name": "notification_email_cc",
+          "Value": "manager@example.com"
+        },
+        {
+          "Name": "notification_email_bcc",
+          "Value": "logs@example.com"
+        },
+        {
+          "Name": "notification_email_subject",
+          "Value": "Backup Job Report: [JOB_NAME]"
+        },
+        {
+          "Name": "power_on_vm_after_creation",
+          "Value": "true"
+        },
+        {
+          "Name": "allow_alternate_secondary_usage",
+          "Value": "false"
+        },
+        {
+          "Name": "vm_name_prefix",
+          "Value": "bkp-"
+        },
+        {
+          "Name": "delete_job_on_success",
+          "Value": "false"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 1,
+          "Name": "Backup Production VMs",
+          "Type": "VM_BACKUP",
+          "RetentionDays": 30,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "Id": "vm-123",
+                "Name": "production-server-1",
+                "Type": "VM",
+                "Children": [
+                  {
+                    "Id": "disk-1",
+                    "Name": "System Disk",
+                    "Type": "DISK",
+                    "Children": []
+                  },
+                  {
+                    "Id": "disk-2",
+                    "Name": "Data Disk",
+                    "Type": "DISK",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "Id": "datastore-456",
+                "Name": "backup-storage",
+                "Type": "DATASTORE",
+                "Children": []
+              }
+            },
+            {
+              "SourceNode": {
+                "Id": "vm-456",
+                "Name": "production-server-2",
+                "Type": "VM",
+                "Children": [
+                  {
+                    "Id": "disk-3",
+                    "Name": "System Disk",
+                    "Type": "DISK",
+                    "Children": []
+                  },
+                  {
+                    "Id": "disk-4",
+                    "Name": "Data Disk",
+                    "Type": "DISK",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "Id": "datastore-456",
+                "Name": "backup-storage",
+                "Type": "DATASTORE",
+                "Children": []
+              }
+            }
+          ],
+          "TransferPathsExclusion": {
+            "ExclusionPatternEntries": [
+              {
+                "Type": "EXTENSION",
+                "Value": "*.tmp",
+                "CaseSensitivity": false
+              },
+              {
+                "Type": "DIRECTORY",
+                "Value": "*temp*",
+                "CaseSensitivity": false
+              }
+            ],
+            "ExclusionEntries": [
+              {
+                "Id": "exclude-1",
+                "Name": "Logs Directory",
+                "Type": "DIRECTORY",
+                "Children": [
+                  {
+                    "Id": "exclude-1-1",
+                    "Name": "Debug Logs",
+                    "Type": "DIRECTORY",
+                    "Children": [],
+                    "Options": {
+                      "recursive": "true"
+                    }
+                  },
+                  {
+                    "Id": "exclude-1-2",
+                    "Name": "Temp Files",
+                    "Type": "FILE",
+                    "Children": [],
+                    "Options": {
+                      "pattern": "*.log.tmp"
+                    }
+                  }
+                ],
+                "Options": {
+                  "recursive": "true"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "StepNumber": 2,
+          "Name": "Archive Backups",
+          "Type": "ARCHIVE",
+          "RetentionDays": 365,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "Id": "datastore-456",
+                "Name": "backup-storage",
+                "Type": "DATASTORE",
+                "Children": [
+                  {
+                    "Id": "backup-folder-1",
+                    "Name": "VM Backups",
+                    "Type": "FOLDER",
+                    "Children": [
+                      {
+                        "Id": "backup-vm-1",
+                        "Name": "production-server-1-backup",
+                        "Type": "BACKUP",
+                        "Children": []
+                      },
+                      {
+                        "Id": "backup-vm-2",
+                        "Name": "production-server-2-backup",
+                        "Type": "BACKUP",
+                        "Children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "Id": "archive-789",
+                "Name": "long-term-storage",
+                "Type": "ARCHIVE",
+                "Children": []
+              }
+            }
+          ],
+          "TransferPathsExclusion": null
+        }
+      ],
+      "RetentionDays": 30,
+      "RecoveryPointId": "rp-1234567890"
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "daa2a78c-278a-4f90-acca-c95d894f46c0",
+    "JobName": "gfr-1741703399752",
+    "JobDisplayName": "gfr-1741703399752",
+    "JobInstanceType": "RESTORE_FILE_VMWARE",
+    "JobInstanceTypeGrouping": "FILE/RESTORE",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-11T15:30:08.8800000Z",
+    "StartTime": "2025-03-11T15:30:09.2100000Z",
+    "EndTime": "2025-03-11T15:34:19.7370000Z",
+    "RetentionDays": 0,
+    "CatalogCompleted": false,
+    "Duration": 250527,
+    "TotalData": 0,
+    "CompletedData": 0,
+    "Throughput": 0,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "2f84332a-b399-41ad-ae04-5df46f8c799b",
+      "Folder": "SS_DEFAULT",
+      "Name": "gfr-1741703399752",
+      "Type": "RESTORE_FILE_VMWARE",
+      "CreationTime": "2025-03-11T15:30:05.8700000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script"
+        },
+        {
+          "Name": "post_job_script"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "USE_LATEST_RECOVERY_POINT",
+          "Value": "false"
+        },
+        {
+          "Name": "delete_vm_if_exists",
+          "Value": "false"
+        },
+        {
+          "Name": "delete_job_on_success",
+          "Value": "false"
+        },
+        {
+          "Name": "restore_mode",
+          "Value": "GRANULAR"
+        },
+        {
+          "Name": "virtual_machine_name",
+          "Value": "null"
+        },
+        {
+          "Name": "power_on_vm_after_creation",
+          "Value": "false"
+        },
+        {
+          "Name": "virtual_machine_UUID",
+          "Value": "5029175b-b039-2f91-e521-9318f5afb1aa"
+        },
+        {
+          "Name": "restore_to_original_location",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "SSSV_vpl4_vmback.1741700269",
+                    "Name": "SSSV_vpl4_vmback.1741700269",
+                    "Type": "VSTOR_SNAPSHOT",
+                    "Children": [
+                      {
+                        "_id": "[vmback]vpl4@86822A42",
+                        "Name": "[vmback]vpl4@86822A42",
+                        "Type": "FILE_SYSTEM_PATH",
+                        "Children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "RetentionDays": 0,
+      "RecoveryPointId": "1741700269.2"
+    },
+    "_collection": "JobInstance"
+  },
+  {
+    "_id": "e711c65e-056a-47ce-8c83-d35bee085761",
+    "JobName": "hyper-v-back",
+    "JobDisplayName": "hyper-v-back",
+    "JobInstanceType": "BACKUP_VIRTUALIZATION_HYPERV",
+    "JobInstanceTypeGrouping": "HYPERV_BACKUP",
+    "JobInstanceId": 0,
+    "JobInstanceExecutorId": "3e377c22853e",
+    "CreationTime": "2025-03-11T14:21:17.0820000Z",
+    "StartTime": "2025-03-11T14:21:17.3410000Z",
+    "EndTime": "2025-03-11T14:23:33.4910000Z",
+    "RetentionDays": 30,
+    "CatalogCompleted": false,
+    "Duration": 136150,
+    "TotalData": 10737418240,
+    "CompletedData": 10737418240,
+    "Throughput": 81305829,
+    "Rc": 0,
+    "Status": "COMPLETED",
+    "TaskId": 0,
+    "Job": {
+      "_id": "46751030-7fa4-4aad-9f91-0bc2e3cb1838",
+      "Folder": "samplefolder2",
+      "Name": "hyper-v-back",
+      "Type": "BACKUP_VIRTUALIZATION_HYPERV",
+      "Comment": "Hyperv backup description",
+      "CreationTime": "2025-03-11T14:10:10.2730000Z",
+      "ModificationTime": "2025-03-11T14:21:15.6550000Z",
+      "Options": [
+        {
+          "Name": "MAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "pre_scripts_fail",
+          "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "pre_job_script",
+          "Value": "null"
+        },
+        {
+          "Name": "post_job_script",
+          "Value": "null"
+        },
+        {
+          "Name": "job_fail",
+          "Value": "RUN_POST_JOB_SCRIPT"
+        },
+        {
+          "Name": "OPERATORMAILADDR",
+          "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+        },
+        {
+          "Name": "VM_BACKUP_IF_DPX_INSTALLED",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_CREATE_FH",
+          "Value": "false"
+        },
+        {
+          "Name": "JOB_VIEW_MODE",
+          "Value": "H"
+        },
+        {
+          "Name": "SSL_ENCRYPT",
+          "Value": "false"
+        },
+        {
+          "Name": "VMW_PROXY_SRV",
+          "Value": "null"
+        },
+        {
+          "Name": "VM_SKIP_UNSUPPORTED",
+          "Value": "true"
+        },
+        {
+          "Name": "VMW_FH_DEFERRED_INT",
+          "Value": "0"
+        },
+        {
+          "Name": "VM_QUIESCE",
+          "Value": "true"
+        }
+      ],
+      "Steps": [
+        {
+          "StepNumber": 0,
+          "Name": "Step-1",
+          "Type": "NOP",
+          "RetentionDays": 0,
+          "TransferPaths": [
+            {
+              "SourceNode": {
+                "_id": "pl-hprv-1",
+                "Name": "pl-hprv-1",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "EB58D12B-D8B4-43F9-A68E-1CBDEC77973D",
+                    "Name": "dmilczarek-empty-vm",
+                    "Type": "VM",
+                    "Children": []
+                  }
+                ]
+              },
+              "DestinationNode": {
+                "_id": "vstor-172.26.0.95",
+                "Name": "vstor-172.26.0.95",
+                "Type": "NODE",
+                "Children": [
+                  {
+                    "_id": "primary",
+                    "Name": "primary",
+                    "Type": "VSTOR_POOL",
+                    "Children": []
+                  }
+                ]
+              }
+            }
+          ],
+          "TransferPathsExclusion": {
+            "ExclusionPatternEntries": [],
+            "ExclusionEntries": []
+          }
+        }
+      ],
+      "RetentionDays": 30
+    },
+    "_collection": "JobInstance"
+  }
+]

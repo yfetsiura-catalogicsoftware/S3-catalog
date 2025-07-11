@@ -1,0 +1,546 @@
+[
+  {
+    "_id": "2f84332a-b399-41ad-ae04-5df46f8c799b",
+    "Folder": "SS_DEFAULT",
+    "Name": "gfr-1741703399752",
+    "Type": "RESTORE_FILE_VMWARE",
+    "CreationTime": "2025-03-11T15:30:05.8700000Z",
+    "Options": [
+      {
+        "Name": "MAILADDR",
+        "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+      },
+      {
+        "Name": "pre_scripts_fail",
+        "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+      },
+      {
+        "Name": "pre_job_script",
+        "Value": null
+      },
+      {
+        "Name": "post_job_script",
+        "Value": null
+      },
+      {
+        "Name": "job_fail",
+        "Value": "RUN_POST_JOB_SCRIPT"
+      },
+      {
+        "Name": "USE_LATEST_RECOVERY_POINT",
+        "Value": "false"
+      },
+      {
+        "Name": "delete_vm_if_exists",
+        "Value": "false"
+      },
+      {
+        "Name": "delete_job_on_success",
+        "Value": "false"
+      },
+      {
+        "Name": "restore_mode",
+        "Value": "GRANULAR"
+      },
+      {
+        "Name": "virtual_machine_name",
+        "Value": "null"
+      },
+      {
+        "Name": "power_on_vm_after_creation",
+        "Value": "false"
+      },
+      {
+        "Name": "virtual_machine_UUID",
+        "Value": "5029175b-b039-2f91-e521-9318f5afb1aa"
+      },
+      {
+        "Name": "restore_to_original_location",
+        "Value": "true"
+      }
+    ],
+    "Steps": [
+      {
+        "StepNumber": 0,
+        "Name": "Step-1",
+        "Type": "NOP",
+        "RetentionDays": 0,
+        "TransferPaths": [
+          {
+            "SourceNode": {
+              "_id": "vstor-172.26.0.95",
+              "Name": "vstor-172.26.0.95",
+              "Type": "NODE",
+              "Children": [
+                {
+                  "_id": "SSSV_vpl4_vmback.1741700269",
+                  "Name": "SSSV_vpl4_vmback.1741700269",
+                  "Type": "VSTOR_SNAPSHOT",
+                  "Children": [
+                    {
+                      "_id": "[vmback]vpl4@86822A42",
+                      "Name": "[vmback]vpl4@86822A42",
+                      "Type": "FILE_SYSTEM_PATH",
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "RetentionDays": 0,
+    "RecoveryPointId": "1741700269.2",
+    "_collection": "Job"
+  },
+  {
+    "_id": "3b37999f-6583-48fa-b0a2-db58dc5ea830",
+    "Folder": "SS_DEFAULT",
+    "Name": "s3restore-2025-03-11_13-00-46",
+    "Type": "S3_RESTORE",
+    "CreationTime": "2025-03-11T14:00:46.2720000Z",
+    "Options": [
+      {
+        "Name": "delete_job_on_success",
+        "Value": "false"
+      }
+    ],
+    "Steps": [],
+    "RetentionDays": 0,
+    "_collection": "Job"
+  },
+  {
+    "_id": "46751030-7fa4-4aad-9f91-0bc2e3cb1838",
+    "Folder": "samplefolder2",
+    "Name": "hyper-v-back",
+    "Type": "BACKUP_VIRTUALIZATION_HYPERV",
+    "Comment": "Hyperv backup description",
+    "CreationTime": "2025-03-11T14:10:10.2730000Z",
+    "ModificationTime": "2025-03-13T14:32:45.0420000Z",
+    "Options": [
+      {
+        "Name": "MAILADDR",
+        "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+      },
+      {
+        "Name": "pre_scripts_fail",
+        "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+      },
+      {
+        "Name": "pre_job_script",
+        "Value": "null"
+      },
+      {
+        "Name": "post_job_script",
+        "Value": "null"
+      },
+      {
+        "Name": "job_fail",
+        "Value": "RUN_POST_JOB_SCRIPT"
+      },
+      {
+        "Name": "OPERATORMAILADDR",
+        "Value": "<RECIPIENT '';CC '';BCC '';SUBJECT '';> ;"
+      },
+      {
+        "Name": "VM_BACKUP_IF_DPX_INSTALLED",
+        "Value": "false"
+      },
+      {
+        "Name": "VMW_CREATE_FH",
+        "Value": "false"
+      },
+      {
+        "Name": "JOB_VIEW_MODE",
+        "Value": "H"
+      },
+      {
+        "Name": "SSL_ENCRYPT",
+        "Value": "false"
+      },
+      {
+        "Name": "VMW_PROXY_SRV",
+        "Value": "null"
+      },
+      {
+        "Name": "VM_SKIP_UNSUPPORTED",
+        "Value": "true"
+      },
+      {
+        "Name": "VMW_FH_DEFERRED_INT",
+        "Value": "0"
+      },
+      {
+        "Name": "VM_QUIESCE",
+        "Value": "true"
+      }
+    ],
+    "Steps": [
+      {
+        "StepNumber": 0,
+        "Name": "Step-1",
+        "Type": "NOP",
+        "RetentionDays": 0,
+        "TransferPaths": [
+          {
+            "SourceNode": {
+              "_id": "pl-hprv-1",
+              "Name": "pl-hprv-1",
+              "Type": "NODE",
+              "Children": [
+                {
+                  "_id": "EB58D12B-D8B4-43F9-A68E-1CBDEC77973D",
+                  "Name": "dmilczarek-empty-vm",
+                  "Type": "VM",
+                  "Children": []
+                }
+              ]
+            },
+            "DestinationNode": {
+              "_id": "vstor-172.26.0.95",
+              "Name": "vstor-172.26.0.95",
+              "Type": "NODE",
+              "Children": [
+                {
+                  "_id": "primary",
+                  "Name": "primary",
+                  "Type": "VSTOR_POOL",
+                  "Children": []
+                }
+              ]
+            }
+          }
+        ],
+        "TransferPathsExclusion": {
+          "ExclusionPatternEntries": [
+            {
+              "Type": "contains",
+              "Value": "asd",
+              "CaseSensitivity": false
+            },
+            {
+              "Type": "equals",
+              "Value": "zxc",
+              "CaseSensitivity": false
+            },
+            {
+              "Type": "startsWith",
+              "Value": "qq",
+              "CaseSensitivity": true
+            },
+            {
+              "Type": "endsWith",
+              "Value": "vv",
+              "CaseSensitivity": true
+            }
+          ],
+          "ExclusionEntries": [
+            {
+              "_id": "pl-hprv-1",
+              "Name": "pl-hprv-1",
+              "Type": "NODE",
+              "Children": [
+                {
+                  "_id": "3CBD5F61-C344-4886-9522-6E9E2D572942",
+                  "Name": "dmilczarek-empty-vm",
+                  "Type": "VM",
+                  "Children": [],
+                  "Options": {}
+                },
+                {
+                  "_id": "59B002FA-1FFB-4795-BE68-92110E818F4E",
+                  "Name": "openmanage_enterprise.x86_64-0.0.1",
+                  "Type": "VM",
+                  "Children": [],
+                  "Options": {}
+                },
+                {
+                  "_id": "2609ACF3-F617-46B6-9307-3889E69C5E3E",
+                  "Name": "VHLK",
+                  "Type": "VM",
+                  "Children": [],
+                  "Options": {}
+                }
+              ],
+              "Options": {}
+            },
+            {
+              "_id": "r610hv-6",
+              "Name": "r610hv-6",
+              "Type": "NODE",
+              "Children": [],
+              "Options": {}
+            }
+          ]
+        }
+      }
+    ],
+    "RetentionDays": 30,
+    "_collection": "Job"
+  },
+  {
+    "_id": "55b0d7f7-4ab2-472f-a3e2-721485ccd471",
+    "Folder": "SS_DEFAULT",
+    "Name": "multivmrestore",
+    "Type": "MULTI_VM_RESTORE",
+    "CreationTime": "2025-03-12T13:04:00.1110000Z",
+    "ModificationTime": "2025-03-12T13:06:40.8810000Z",
+    "Options": [
+      {
+        "Name": "node_name",
+        "Value": "vpl4"
+      },
+      {
+        "Name": "placement_id",
+        "Value": "host-6086"
+      },
+      {
+        "Name": "placement_name",
+        "Value": "pl-esxi-10"
+      },
+      {
+        "Name": "placement_type",
+        "Value": "HOST"
+      },
+      {
+        "Name": "folder_id",
+        "Value": "group-v3008"
+      },
+      {
+        "Name": "folder_name",
+        "Value": "dmilczarek"
+      },
+      {
+        "Name": "network_id",
+        "Value": "network-6003"
+      },
+      {
+        "Name": "network_name",
+        "Value": "V27"
+      },
+      {
+        "Name": "datastore_id",
+        "Value": "datastore-1004"
+      },
+      {
+        "Name": "datastore_name",
+        "Value": "VSTOR_PL_NFS_SHARE_VPL4"
+      },
+      {
+        "Name": "use_original_mac_address",
+        "Value": "False"
+      },
+      {
+        "Name": "notification_mode",
+        "Value": "NO_NOTIFICATIONS"
+      },
+      {
+        "Name": "notification_email_to",
+        "Value": null
+      },
+      {
+        "Name": "notification_email_cc",
+        "Value": null
+      },
+      {
+        "Name": "notification_email_bcc",
+        "Value": null
+      },
+      {
+        "Name": "notification_email_subject",
+        "Value": null
+      },
+      {
+        "Name": "power_on_vm_after_creation",
+        "Value": "False"
+      },
+      {
+        "Name": "allow_alternate_secondary_usage",
+        "Value": "False"
+      },
+      {
+        "Name": "vm_name_prefix",
+        "Value": null
+      }
+    ],
+    "Steps": [],
+    "RetentionDays": 0,
+    "_collection": "Job"
+  },
+  {
+    "_id": "84d90134-653f-4dea-ae5c-57757770283c",
+    "Folder": "SS_DEFAULT",
+    "Name": "gfr-1741789337887",
+    "Type": "RESTORE_FILE_HYPERV",
+    "CreationTime": "2025-03-12T15:22:10.9770000Z",
+    "Options": [
+      {
+        "Name": "MAILADDR",
+        "Value": "<RECIPIENT 'DEFAULT';CC 'DEFAULT';BCC 'DEFAULT';SUBJECT 'DEFAULT';> ;"
+      },
+      {
+        "Name": "pre_scripts_fail",
+        "Value": "RUN_JOB_RUN_POST_JOB_SCRIPT"
+      },
+      {
+        "Name": "pre_job_script",
+        "Value": null
+      },
+      {
+        "Name": "post_job_script",
+        "Value": null
+      },
+      {
+        "Name": "job_fail",
+        "Value": "RUN_POST_JOB_SCRIPT"
+      },
+      {
+        "Name": "USE_LATEST_RECOVERY_POINT",
+        "Value": "false"
+      },
+      {
+        "Name": "delete_vm_if_exists",
+        "Value": "false"
+      },
+      {
+        "Name": "delete_job_on_success",
+        "Value": "true"
+      },
+      {
+        "Name": "restore_mode",
+        "Value": "GRANULAR"
+      },
+      {
+        "Name": "virtual_machine_name",
+        "Value": "null"
+      },
+      {
+        "Name": "power_on_vm_after_creation",
+        "Value": "false"
+      },
+      {
+        "Name": "virtual_machine_UUID",
+        "Value": "EB58D12B-D8B4-43F9-A68E-1CBDEC77973D"
+      },
+      {
+        "Name": "restore_to_original_location",
+        "Value": "true"
+      }
+    ],
+    "Steps": [
+      {
+        "StepNumber": 0,
+        "Name": "Step-1",
+        "Type": "NOP",
+        "RetentionDays": 0,
+        "TransferPaths": [
+          {}
+        ]
+      }
+    ],
+    "RetentionDays": 0,
+    "RecoveryPointId": "67d0523616aa2a192b9d2754",
+    "_collection": "Job"
+  },
+  {
+    "_id": "bbc0a370-5c95-45c1-9807-bbb945d101d7",
+    "Folder": "SS_DEFAULT",
+    "Name": "sample-multivm-2",
+    "Type": "MULTI_VM_RESTORE",
+    "CreationTime": "2025-03-13T09:42:19.8060000Z",
+    "Options": [
+      {
+        "Name": "node_name",
+        "Value": "vpl4"
+      },
+      {
+        "Name": "placement_id",
+        "Value": "host-6086"
+      },
+      {
+        "Name": "placement_name",
+        "Value": "pl-esxi-10"
+      },
+      {
+        "Name": "placement_type",
+        "Value": "HOST"
+      },
+      {
+        "Name": "folder_id",
+        "Value": "group-v3008"
+      },
+      {
+        "Name": "folder_name",
+        "Value": "dmilczarek"
+      },
+      {
+        "Name": "network_id",
+        "Value": "network-6003"
+      },
+      {
+        "Name": "network_name",
+        "Value": "V27"
+      },
+      {
+        "Name": "datastore_id",
+        "Value": "datastore-1004"
+      },
+      {
+        "Name": "datastore_name",
+        "Value": "VSTOR_PL_NFS_SHARE_VPL4"
+      },
+      {
+        "Name": "use_original_mac_address",
+        "Value": "True"
+      },
+      {
+        "Name": "notification_mode",
+        "Value": "CUSTOM_NOTIFICATION"
+      },
+      {
+        "Name": "notification_email_to",
+        "Value": "to@email.com"
+      },
+      {
+        "Name": "notification_email_cc",
+        "Value": "cc@email.com"
+      },
+      {
+        "Name": "notification_email_bcc",
+        "Value": "bcc@email.com"
+      },
+      {
+        "Name": "notification_email_subject",
+        "Value": "testsub"
+      },
+      {
+        "Name": "power_on_vm_after_creation",
+        "Value": "True"
+      },
+      {
+        "Name": "allow_alternate_secondary_usage",
+        "Value": "False"
+      },
+      {
+        "Name": "vm_name_prefix",
+        "Value": "namepref-"
+      }
+    ],
+    "Steps": [],
+    "RetentionDays": 0,
+    "_collection": "Job"
+  },
+  {
+    "_id": "d9a89f80-b60f-4e94-b356-3d0ff0f330a0",
+    "Folder": "SS_DEFAULT",
+    "Name": "s3back",
+    "Type": "S3_BACKUP",
+    "CreationTime": "2025-03-11T13:59:53.4270000Z",
+    "Options": [],
+    "Steps": [],
+    "RetentionDays": 90,
+    "_collection": "Job"
+  }
+]

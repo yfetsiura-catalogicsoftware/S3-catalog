@@ -1,0 +1,129 @@
+[{
+  "_id": "137c2100-e310-4c24-b186-d28efbb34d78",
+  "BackupSources": 
+  [
+    {
+      "NodeId": "67d2d2081267fe59355a3f80",
+      "NodeName": "datacore",
+      "Buckets": 
+      [
+        "fets-bucket"
+      ],
+      "AllBucketsAreBackupTarget": false
+    }
+  ],
+  "BackupDestination": 
+  {
+    "NodeId": "vStorNode",
+    "NodeName": "vStorNode",
+    "PoolName": "fetsi-vstor-pool"
+  }
+},
+{
+  "_id": "e499bcca-d23c-40e9-a328-8c8d2b84e77a",
+  "BackupSources": 
+  [
+    {
+      "NodeId": "67d2d2081267fe59355a3f80",
+      "NodeName": "datacore",
+      "Buckets": 
+      [
+        "s3-13-03"
+      ],
+      "AllBucketsAreBackupTarget": false
+    }
+  ],
+  "BackupDestination": 
+  {
+    "NodeId": "vStorNode",
+    "NodeName": "vStorNode",
+    "PoolName": "fetsi-vstor-pool"
+  }
+},
+{
+  "_id": {"$oid": "67e676d284ab84119eef591c"},
+  "Guid": "6f744c7f-9b20-4327-b8c0-f6da7cc0568c",
+  "Source": 
+  [
+    {
+      "NodeId": "67d2d2081267fe59355a3f80",
+      "NodeName": "datacore",
+      "Buckets": 
+      [
+        {
+          "Name": "s3-13-03",
+          "UseLatest": true,
+          "RecoveryPointId": null
+        }
+      ]
+    }
+  ],
+  "Destination": 
+  {
+    "NodeId": "67d2d2081267fe59355a3f80",
+    "NodeName": "datacore"
+  },
+  "JobOptions": 
+  {
+    "AutogenerateJobName": true,
+    "DeleteRestoreJobWhenCompleted": true
+  }
+},
+{
+  "_id": {"$oid": "67efa4ee84ab84119eef593a"},
+  "Guid": "75bb22e1-148e-41b6-a923-21036c14b343",
+  "Source": 
+  [
+    {
+      "NodeId": "67d2d2081267fe59355a3f80",
+      "NodeName": "datacore",
+      "Buckets": 
+      [
+        {
+          "Name": "s3-13-03",
+          "UseLatest": false,
+          "RecoveryPointId": "67d2daa6bef271788fe0f5cb"
+        }
+      ]
+    }
+  ],
+  "Destination": 
+  {
+    "NodeId": "67d2d2081267fe59355a3f80",
+    "NodeName": "datacore"
+  },
+  "JobOptions": 
+  {
+    "AutogenerateJobName": true,
+    "DeleteRestoreJobWhenCompleted": true
+  }
+},
+{
+  "_id": {"$oid": "67efa53484ab84119eef594f"},
+  "Guid": "287b5c30-30b3-4365-9de0-695892e98743",
+  "Source": 
+  [
+    {
+      "NodeId": "67d2d2081267fe59355a3f80",
+      "NodeName": "datacore",
+      "Buckets": 
+      [
+        {
+          "Name": "s3-13-03",
+          "UseLatest": false,
+          "RecoveryPointId": "67d3dd04a1772a5e8e6c0e4e"
+        }
+      ]
+    }
+  ],
+  "Destination": 
+  {
+    "NodeId": "67d2d2081267fe59355a3f80",
+    "NodeName": "datacore"
+  },
+  "JobOptions": 
+  {
+    "AutogenerateJobName": true,
+    "DeleteRestoreJobWhenCompleted": false
+  }
+}]

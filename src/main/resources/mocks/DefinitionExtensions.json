@@ -1,0 +1,100 @@
+[
+  {
+    "_id": "55b0d7f7-4ab2-472f-a3e2-721485ccd471",
+    "VmsArray": [
+      {
+        "Guid": "5029175b-b039-2f91-e521-9318f5afb1aa",
+        "Order": 0,
+        "UseLatest": true,
+        "VcenterNodeName": "vpl4",
+        "VmName": "dmilczarek-dpx-rc2-4-12-1"
+      }
+    ],
+    "NetworkRules": [
+      {
+        "SourceName": "source-network-1",
+        "Destination": {
+          "Id": "network-1234",
+          "Name": "destination-network-1"
+        }
+      },
+      {
+        "SourceName": "source-network-2",
+        "Destination": {
+          "Id": "network-5678",
+          "Name": "destination-network-2"
+        }
+      }
+    ],
+    "_collection": "DefinitionExtensions"
+  },
+  {
+    "_id": "bbc0a370-5c95-45c1-9807-bbb945d101d7",
+    "VmsArray": [
+      {
+        "Guid": "5029175b-b039-2f91-e521-9318f5afb1aa",
+        "Order": 0,
+        "UseLatest": true,
+        "VcenterNodeName": "vpl4",
+        "VmName": "dmilczarek-dpx-rc2-4-12-1"
+      }
+    ],
+    "NetworkRules": [
+      {
+        "SourceName": "V27",
+        "Destination": {
+          "_id": "network-13",
+          "Name": "VM Network"
+        }
+      }
+    ],
+    "IpMapping": {
+      "CredentialGuid": "67a334bbc4694016fa0d9372",
+      "Rules": [
+        {
+          "OriginalNetwork": {
+            "IpRange": "192.168.1.x"
+          },
+          "TargetNetwork": {
+            "Type": "STATIC",
+            "IpRange": "10.0.1.x",
+            "SubnetMask": "255.255.255.0",
+            "Gateway": "10.0.1.1",
+            "DnsServers": [
+              "8.8.8.8",
+              "8.8.4.4"
+            ]
+          }
+        },
+        {
+          "OriginalNetwork": {
+            "IpRange": "192.168.2.x"
+          },
+          "TargetNetwork": {
+            "Type": "DHCP",
+            "IpRange": null,
+            "SubnetMask": null,
+            "Gateway": null,
+            "DnsServers": null
+          }
+        },
+        {
+          "OriginalNetwork": {
+            "IpRange": "192.168.3.0"
+          },
+          "TargetNetwork": {
+            "Type": "STATIC",
+            "IpRange": "10.0.3.0",
+            "SubnetMask": "255.255.255.0",
+            "Gateway": "10.0.3.1",
+            "DnsServers": [
+              "192.168.1.1",
+              "192.168.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    "_collection": "DefinitionExtensions"
+  }
+]
