@@ -44,11 +44,17 @@ public class S3_v2_service {
 //            to,
 //            "bucket",
 //            "sourceEnd");
+//    var list =
+//        versioningTransferAggregator.toDeleteBeforeTransfer(
+//            UUID.fromString("00000000-0000-0000-0000-000000000000"),
+//            from,
+//            to,
+//            "bucket",
+//            "sourceEnd");
+
     var list =
-        versioningTransferAggregator.toDeleteBeforeTransfer(
+        versioningTransferAggregator.toDeleteFilesThatDontExistOnTheSource(
             UUID.fromString("00000000-0000-0000-0000-000000000000"),
-            from,
-            to,
             "bucket",
             "sourceEnd");
 

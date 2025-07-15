@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators.Slice;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Component;
@@ -137,6 +138,38 @@ public class VersioningTransferAggregator {
     return CloseableIteratorImpl.toCloseableIterator(
         mongoAggregation,
         doc -> catalogMongoTemplate.getConverter().read(ObjectVersionSnapshot.class, doc));
+  }
+
+  public CloseableIterator<ObjectVersionSnapshot> toDeleteFilesThatDontExistOnTheSource(
+      UUID jobId, String bucketName, String sourceEndpoint) {
+    var agg =
+        Aggregation.newAggregation(
+            Aggregation.match(
+                Criteria.where("s3BucketPurpose")
+                    .is(S3BucketPurpose.DESTINATION)
+                    .and("jobDefinitionGuid")
+                    .is(jobId)
+                    .and("bucket")
+                    .is(bucketName)
+                    .and("sourceEndpoint")
+                    .is(sourceEndpoint)),
+            LookupOperation.newLookup()
+                .from("object_version")
+                .localField("key")
+                .foreignField("key")
+                .pipeline(
+                    Aggregation.match(
+                        Criteria.where("s3BucketPurpose")
+                            .is(S3BucketPurpose.SOURCE)
+                            .and("bucket")
+                            .is(bucketName)
+                            .and("sourceEndpoint")
+                            .is(sourceEndpoint)
+                            .and("jobDefinitionGuid")
+                            .is(jobId)))
+                .as("src"),
+            Aggregation.match(Criteria.where("src").size(0)));
+    return stream(agg);
   }
 
   private MongoCursor<Document> nativeMongoAggregation(List<Document> pipeline) {
