@@ -3,6 +3,7 @@ package pl.catalogic.demo.s3.v2;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.springframework.data.domain.Sort;
@@ -10,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Component;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
@@ -33,85 +35,71 @@ public class NonVersioningTransferAggregator {
   public CloseableIterator<ObjectVersionSnapshot> toDeleteBeforeTransfer(
       UUID jobDefinitionId, Date fromDate, Date toDate, String bucket, String sourceEndpoint) {
 
-    // Оптимізована версія для великих даних
-    // 1. Спочатку знаходимо ключі SOURCE файлів через потік (не завантажуємо все в пам'ять)
-    var sourceKeysAgg =
+    // Простий підхід: знайти всі DESTINATION файли що треба видалити
+    var filesToDelete = new ArrayList<ObjectVersionSnapshot>();
+    
+    // 1. Знайти ключі з SOURCE файлами в діапазоні
+    var sourceKeysResult = catalogMongoTemplate.aggregate(
         Aggregation.newAggregation(
             Aggregation.match(
-                Criteria.where("s3BucketPurpose")
-                    .is(S3BucketPurpose.SOURCE)
-                    .and("jobDefinitionGuid")
-                    .is(jobDefinitionId)
-                    .and("bucket")
-                    .is(bucket)
-                    .and("sourceEndpoint")
-                    .is(sourceEndpoint)
-                    .and("lastModified")
-                    .gt(fromDate)
-                    .lte(toDate)),
-            Aggregation.group("key").count().as("sourceCount"));
+                Criteria.where("s3BucketPurpose").is(S3BucketPurpose.SOURCE)
+                    .and("jobDefinitionGuid").is(jobDefinitionId)
+                    .and("bucket").is(bucket)
+                    .and("sourceEndpoint").is(sourceEndpoint)
+                    .and("lastModified").gt(fromDate).lte(toDate)),
+            Aggregation.group("key")),
+        "object_version", Object.class);
 
-    // Використовуємо потік для обробки великих даних
-    var transferKeyCount = new java.util.HashMap<String, Integer>();
-    try (var sourceStream =
-        catalogMongoTemplate.aggregateStream(sourceKeysAgg, "object_version", Object.class)) {
-      sourceStream.forEach(
-          result -> {
-            @SuppressWarnings("unchecked")
-            var doc = (java.util.Map<String, Object>) result;
-            var key = (String) doc.get("_id");
-            var count = ((Number) doc.get("sourceCount")).intValue();
-            transferKeyCount.put(key, count);
-          });
-    }
+    var sourceKeys = new ArrayList<String>();
+    sourceKeysResult.forEach(result -> {
+      @SuppressWarnings("unchecked")
+      var doc = (java.util.Map<String, Object>) result;
+      sourceKeys.add((String) doc.get("_id"));
+    });
 
-    if (transferKeyCount.isEmpty()) {
-      return CloseableIteratorImpl.toCloseableIterator(Stream.empty());
-    }
+    // 2. Для кожного ключа знайти файли для видалення
+    for (var key : sourceKeys) {
+      // Знайти фактичну кількість SOURCE файлів для цього ключа
+      var actualSourceCount = (int) catalogMongoTemplate.count(
+          Query.query(
+              Criteria.where("s3BucketPurpose").is(S3BucketPurpose.SOURCE)
+                  .and("jobDefinitionGuid").is(jobDefinitionId)
+                  .and("bucket").is(bucket)
+                  .and("sourceEndpoint").is(sourceEndpoint)
+                  .and("key").is(key)
+                  .and("lastModified").gt(fromDate).lte(toDate)),
+          ObjectVersionSnapshot.class);
 
-    // 2. Обробляємо кожен ключ окремо через Java логіку (MongoDB агрегація занадто складна)
-    var filesToDelete = new ArrayList<ObjectVersionSnapshot>();
+      var destFiles = catalogMongoTemplate.find(
+          Query.query(
+              Criteria.where("s3BucketPurpose").is(S3BucketPurpose.DESTINATION)
+                  .and("jobDefinitionGuid").is(jobDefinitionId)
+                  .and("bucket").is(bucket)
+                  .and("sourceEndpoint").is(sourceEndpoint)
+                  .and("key").is(key))
+              .with(Sort.by(Sort.Direction.ASC, "lastModified")),
+          ObjectVersionSnapshot.class);
 
-    for (var entry : transferKeyCount.entrySet()) {
-      var key = entry.getKey();
-      var sourceCount = entry.getValue();
-      var destAgg =
-          Aggregation.newAggregation(
-              Aggregation.match(
-                  Criteria.where("s3BucketPurpose")
-                      .is(S3BucketPurpose.DESTINATION)
-                      .and("jobDefinitionGuid")
-                      .is(jobDefinitionId)
-                      .and("bucket")
-                      .is(bucket)
-                      .and("sourceEndpoint")
-                      .is(sourceEndpoint)
-                      .and("key")
-                      .is(key)),
-              Aggregation.sort(Sort.by(Sort.Direction.ASC, "lastModified")));
-      var destFiles =
-          catalogMongoTemplate.aggregate(destAgg, "object_version", ObjectVersionSnapshot.class);
-      var destList = new ArrayList<ObjectVersionSnapshot>();
-      destFiles.forEach(destList::add);
+      // Рахувати ФАКТИЧНУ кількість що піде на трансфер
+      var actualTransferCount = Math.min(actualSourceCount, MAX_VERSIONS_TO_TRANSFER);
+      var totalAfter = actualTransferCount + destFiles.size();
+      var toDelete = totalAfter - MAX_VERSIONS_TO_KEEP;
+      
+      System.out.println("Key: " + key + 
+                        ", SOURCE found: " + actualSourceCount + 
+                        ", will transfer: " + actualTransferCount + 
+                        ", DEST: " + destFiles.size() + 
+                        ", total after: " + totalAfter + 
+                        ", to delete: " + toDelete);
 
-      // Рахуємо скільки файлів РЕАЛЬНО піде на трансфер (max MAX_VERSIONS_TO_TRANSFER)
-      var actualTransferCount = Math.min(sourceCount, MAX_VERSIONS_TO_TRANSFER);
-      var totalAfterTransfer = actualTransferCount + destList.size();
-      var toDeleteCount = totalAfterTransfer - MAX_VERSIONS_TO_KEEP;
-      if (toDeleteCount > 0) {
-        // Видаляємо найстарші DESTINATION файли
-        for (int i = 0; i < Math.min(toDeleteCount, destList.size()); i++) {
-          filesToDelete.add(destList.get(i));
-          System.out.println(
-              "  DELETE: "
-                  + destList.get(i).getVersionId()
-                  + " - "
-                  + destList.get(i).getLastModified());
-        }
+      if (toDelete > 0) {
+        var filesToDeleteForKey = destFiles.subList(0, Math.min(toDelete, destFiles.size()));
+        filesToDelete.addAll(filesToDeleteForKey);
+        filesToDeleteForKey.forEach(f -> 
+            System.out.println("  DELETE: " + f.getVersionId() + " - " + f.getLastModified()));
       }
     }
 
-    // 3. Повертаємо ітератор з файлами для видалення
     return CloseableIteratorImpl.toCloseableIterator(filesToDelete.stream());
   }
 
