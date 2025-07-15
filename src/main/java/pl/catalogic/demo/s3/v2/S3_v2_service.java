@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Component;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshotRepository;
@@ -19,6 +18,7 @@ public class S3_v2_service {
   private final S3Client s3Client;
   private final TestAggregator testAggregator;
   private final NonVersioningTransferAggregator nonVersioningTransferAggregator;
+  private final VersioningTransferAggregator versioningTransferAggregator;
   private static final String access = "4ftj1JPFl6VNjCejmRnq";
   private static final String secret = "2fVtMZmzA5Y17L4anicLYdx5mzLxSB91qhxBi2XU";
   private static final String end = "http://172.26.0.137:9004";
@@ -26,13 +26,34 @@ public class S3_v2_service {
 
   @SneakyThrows
   public void getAllFrom() {
-    var from = Date.from(Instant.parse("2025-07-11T19:44:00.00Z"));
-    var to = Date.from(Instant.parse("2025-07-11T19:51:00.00Z"));
+    var from = Date.from(Instant.parse("2025-07-15T09:00:00.00Z"));
+    var to = Date.from(Instant.parse("2025-07-15T12:30:00.00Z"));
 
-    var delete = nonVersioningTransferAggregator.toDeleteBeforeTransfer(
-        UUID.fromString("00000000-0000-0000-0000-000000000000"),from,to, "bucket","sourceEnd");
-    System.out.println("--------- cleanup files------------------");
-    delete.stream().forEach(System.out::println);
+    //    var list = versioningTransferAggregator.toDeleteBeforeTransfer(
+    //        UUID.fromString("00000000-0000-0000-0000-000000000000"),from,to,
+    // "bucket","sourceEnd");
+    //    var list = nonVersioningTransferAggregator.toTransfer(
+    //        UUID.fromString("00000000-0000-0000-0000-000000000000"), from, to, "bucket",
+    // "sourceEnd");
+    //    var list = nonVersioningTransferAggregator.toDelete(
+    //        UUID.fromString("00000000-0000-0000-0000-000000000000"), "bucket", "sourceEnd");
+//    var list =
+//        versioningTransferAggregator.toTransfer(
+//            UUID.fromString("00000000-0000-0000-0000-000000000000"),
+//            from,
+//            to,
+//            "bucket",
+//            "sourceEnd");
+    var list =
+        versioningTransferAggregator.toDeleteBeforeTransfer(
+            UUID.fromString("00000000-0000-0000-0000-000000000000"),
+            from,
+            to,
+            "bucket",
+            "sourceEnd");
+
+    System.out.println("---------files------------------");
+    list.stream().forEach(System.out::println);
     System.out.println("---------------------------");
   }
 
@@ -50,15 +71,25 @@ public class S3_v2_service {
                 .join()
                 .contents();
 
-        source
-            .listObjectVersionsPaginator(builder -> builder.bucket("versioning"))
-            .subscribe(
-                versions -> {
-                  versions.versions().forEach(o -> repository.save(new
-     ObjectVersionSnapshot(o.versionId(),o.key(),o.eTag(),o.lastModified(),
-                      S3BucketPurpose.SOURCE,o.size(),
-     UUID.fromString("00000000-0000-0000-0000-000000000000"),"sourceEnd","bucket")));
-                });
+    source
+        .listObjectVersionsPaginator(builder -> builder.bucket("versioning"))
+        .subscribe(
+            versions -> {
+              versions
+                  .versions()
+                  .forEach(
+                      o ->
+                          repository.save(
+                              new ObjectVersionSnapshot(
+                                  o.versionId(),
+                                  o.key(),
+                                  o.lastModified(),
+                                  S3BucketPurpose.SOURCE,
+                                  o.size(),
+                                  UUID.fromString("00000000-0000-0000-0000-000000000000"),
+                                  "sourceEnd",
+                                  "bucket")));
+            });
 
     //    var desti = s3Client.asyncClient("i10hIqm3NG2jrzPsbZSL",
     //        "gPyPsj0MThjiovhDNSYMeeFactLmGbjcmJUrfQsT", "http://172.26.0.137:9002/");

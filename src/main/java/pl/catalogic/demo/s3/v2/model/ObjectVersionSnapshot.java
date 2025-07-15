@@ -4,17 +4,21 @@ import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 import software.amazon.awssdk.services.s3.model.ObjectVersion;
 
 @Document("object_version")
-@CompoundIndex(def = "{'versionId': 1, 'key': 1, 'etag': 1}", unique = true)
+@CompoundIndexes({
+  @CompoundIndex(def = "{'s3BucketPurpose': 1, 'jobDefinitionGuid': 1, 'bucket': 1, 'sourceEndpoint': 1, 'lastModified': 1, 'key': 1}", name = "source_compound_idx"),
+  @CompoundIndex(def = "{'key': 1, 's3BucketPurpose': 1, 'jobDefinitionGuid': 1, 'bucket': 1, 'sourceEndpoint': 1, 'lastModified': 1}", name = "destination_compound_idx"),
+  @CompoundIndex(def = "{'versionId': 1, 'key': 1}", unique = true, name = "version_unique_idx")
+})
 public class ObjectVersionSnapshot {
 
   @Id private String id;
   private String versionId;
   private String key;
-  private String etag;
   private Instant lastModified;
   private S3BucketPurpose s3BucketPurpose;
   private long size;
@@ -27,7 +31,6 @@ public class ObjectVersionSnapshot {
   public ObjectVersionSnapshot(
       String versionId,
       String key,
-      String etag,
       Instant lastModified,
       S3BucketPurpose s3BucketPurpose,
       long size,
@@ -36,7 +39,6 @@ public class ObjectVersionSnapshot {
       String bucket) {
     this.versionId = versionId;
     this.key = key;
-    this.etag = etag;
     this.lastModified = lastModified;
     this.s3BucketPurpose = s3BucketPurpose;
     this.size = size;
@@ -53,7 +55,6 @@ public class ObjectVersionSnapshot {
       String bucket) {
     this.versionId = objectVersion.versionId();
     this.key = objectVersion.key();
-    this.etag = objectVersion.eTag();
     this.lastModified = objectVersion.lastModified();
     this.s3BucketPurpose = bucketPurpose;
     this.size = objectVersion.size();
@@ -76,14 +77,6 @@ public class ObjectVersionSnapshot {
 
   public void setKey(String key) {
     this.key = key;
-  }
-
-  public String getEtag() {
-    return etag;
-  }
-
-  public void setEtag(String etag) {
-    this.etag = etag;
   }
 
   public Instant getLastModified() {
@@ -148,7 +141,6 @@ public class ObjectVersionSnapshot {
         "id='" + id + '\'' +
         ", versionId='" + versionId + '\'' +
         ", key='" + key + '\'' +
-        ", etag='" + etag + '\'' +
         ", lastModified=" + lastModified +
         ", s3BucketPurpose=" + s3BucketPurpose +
         ", size=" + size +
