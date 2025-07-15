@@ -1,6 +1,7 @@
 package pl.catalogic.demo.s3.v2.model;
 
 import java.time.Instant;
+import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,8 +18,8 @@ public class ObjectVersionSnapshot {
   private Instant lastModified;
   private S3BucketPurpose s3BucketPurpose;
   private long size;
-  private String jobDefinitionGuid;
-  private String endpoint;
+  private UUID jobDefinitionGuid;
+  private String sourceEndpoint;
   private String bucket;
 
   public ObjectVersionSnapshot() {}
@@ -30,8 +31,8 @@ public class ObjectVersionSnapshot {
       Instant lastModified,
       S3BucketPurpose s3BucketPurpose,
       long size,
-      String jobDefinitionGuid,
-      String endpoint,
+      UUID jobDefinitionGuid,
+      String sourceEndpoint,
       String bucket) {
     this.versionId = versionId;
     this.key = key;
@@ -40,15 +41,15 @@ public class ObjectVersionSnapshot {
     this.s3BucketPurpose = s3BucketPurpose;
     this.size = size;
     this.jobDefinitionGuid = jobDefinitionGuid;
-    this.endpoint = endpoint;
+    this.sourceEndpoint = sourceEndpoint;
     this.bucket = bucket;
   }
 
   public ObjectVersionSnapshot(
       ObjectVersion objectVersion,
       S3BucketPurpose bucketPurpose,
-      String jobDefinitionGuid,
-      String endpoint,
+      UUID jobDefinitionGuid,
+      String sourceEndpoint,
       String bucket) {
     this.versionId = objectVersion.versionId();
     this.key = objectVersion.key();
@@ -57,7 +58,7 @@ public class ObjectVersionSnapshot {
     this.s3BucketPurpose = bucketPurpose;
     this.size = objectVersion.size();
     this.jobDefinitionGuid = jobDefinitionGuid;
-    this.endpoint = endpoint;
+    this.sourceEndpoint = sourceEndpoint;
     this.bucket = bucket;
   }
 
@@ -117,20 +118,20 @@ public class ObjectVersionSnapshot {
     this.s3BucketPurpose = s3BucketPurpose;
   }
 
-  public String getJobDefinitionGuid() {
+  public UUID getJobDefinitionGuid() {
     return jobDefinitionGuid;
   }
 
-  public void setJobDefinitionGuid(String jobDefinitionGuid) {
+  public void setJobDefinitionGuid(UUID jobDefinitionGuid) {
     this.jobDefinitionGuid = jobDefinitionGuid;
   }
 
-  public String getEndpoint() {
-    return endpoint;
+  public String getSourceEndpoint() {
+    return sourceEndpoint;
   }
 
-  public void setEndpoint(String endpoint) {
-    this.endpoint = endpoint;
+  public void setSourceEndpoint(String sourceEndpoint) {
+    this.sourceEndpoint = sourceEndpoint;
   }
 
   public String getBucket() {
@@ -152,7 +153,7 @@ public class ObjectVersionSnapshot {
         ", s3BucketPurpose=" + s3BucketPurpose +
         ", size=" + size +
         ", jobDefinitionGuid='" + jobDefinitionGuid + '\'' +
-        ", endpoint='" + endpoint + '\'' +
+        ", endpoint='" + sourceEndpoint + '\'' +
         ", bucket='" + bucket + '\'' +
         '}';
   }
