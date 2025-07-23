@@ -1,20 +1,43 @@
 package pl.catalogic.demo.s3.v2;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.catalogic.demo.s3.v2.model.S3BucketPurpose;
 
 @RestController
 @RequestMapping("/api/v2")
 @RequiredArgsConstructor
 public class S3_v2_controller {
   private final S3_v2_service service;
-
+  private final ObjectVersionService objectVersionService;
   @GetMapping
   public ResponseEntity<String> replication() {
-    service.getAllFrom();
+    var startTime = Instant.now();
+    System.out.println("start aggregation");
+    service.getAllFroms();
+    var duration = Duration.between(startTime, Instant.now());
+    System.out.println("Completed toDelete aggregation in " + duration.toSeconds() + " s");
     return ResponseEntity.ok("console");
   }
+
+  @GetMapping("/set")
+  public ResponseEntity<String> set() {
+    objectVersionService.updateLastModifiedByPurpose(S3BucketPurpose.SOURCE, Instant.from(Instant.parse("2023-01-01T00:00:00.00Z")));
+    objectVersionService.updateLastModifiedByPurpose(S3BucketPurpose.DESTINATION, Instant.from(Instant.parse("2023-01-01T23:00:00.00Z")));
+    return ResponseEntity.ok("console");
+  }
+  @GetMapping("/generate")
+  public ResponseEntity<String> generate() {
+    service.generate();
+    return ResponseEntity.ok("generate");
+  }
+
+
 }

@@ -1,6 +1,7 @@
 package pl.catalogic.demo.s3.v2;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -41,8 +42,8 @@ public class S3_v2_service {
     //    var list = nonVersioningTransferAggregator.toTransfer(
     //        UUID.fromString("00000000-0000-0000-0000-000000000000"), from, to, "bucket",
     // "sourceEnd");
-    //    var list = nonVersioningTransferAggregator.toDelete(
-    //        UUID.fromString("00000000-0000-0000-0000-000000000000"), "bucket", "sourceEnd");
+        var list = nonVersioningTransferAggregator.delete(
+            UUID.fromString("00000000-0000-0000-0000-000000000000"), "milion", "endpoint");
 //    var list =
 //        versioningTransferAggregator.toTransfer(
 //            UUID.fromString("00000000-0000-0000-0000-000000000000"),
@@ -57,29 +58,47 @@ public class S3_v2_service {
 //            to,
 //            "bucket",
 //            "sourceEnd");
-
-    var list =
-        versioningTransferAggregator.toDeleteFilesThatDontExistOnTheSource(
-            UUID.fromString("00000000-0000-0000-0000-000000000000"),
-            "bucket",
-            "sourceEnd");
+//
+//    var list =
+//        versioningTransferAggregator.toDeleteFilesThatDontExistOnTheSource(
+//            UUID.fromString("00000000-0000-0000-0000-000000000000"),
+//            "bucket",
+//            "sourceEnd");
 
     System.out.println("---------files------------------");
     list.stream().forEach(System.out::println);
     System.out.println("---------------------------");
   }
 
-  public void getAllFrom() {
-
-    var source =
-        s3Client.asyncClient(
-            "GG49tebVFzBv0NMvd4XQ",
-            "RQY96I9fBQdt5pU6CmsZZuTaQGCJNq7sPCg9iS3t",
-            "http://172.26.0.137:9002");
-
-    getAllBuckets(source);
-    countObjectsInBucket(source,"non-lotsa");
-
+  public void generate() {
+    List<ObjectVersionSnapshot> toSav = new ArrayList<>();
+    for(int i=0; i<250_000;i++){
+      toSav.add(new ObjectVersionSnapshot(
+          "",
+          i+"_object",
+          Instant.parse("2023-01-01T00:00:00.00Z"),
+          S3BucketPurpose.SOURCE,
+          1024,
+          UUID.fromString("00000000-0000-0000-0000-000000000000"),
+          "endpoint",
+          "milion"
+      ));
+    }
+    repository.saveAll(toSav);
+    List<ObjectVersionSnapshot> toSaveDest = new ArrayList<>();
+    for(int j=0; j<250_000;j++){
+      toSaveDest.add(new ObjectVersionSnapshot(
+          "",
+          j+"_object",
+          Instant.parse("2023-01-01T23:00:00.00Z"),
+          S3BucketPurpose.DESTINATION,
+          1024,
+          UUID.fromString("00000000-0000-0000-0000-000000000000"),
+          "endpoint",
+          "milion"
+      ));
+    }
+    repository.saveAll(toSaveDest);
   }
 
   /**
