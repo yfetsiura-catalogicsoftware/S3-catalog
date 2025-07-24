@@ -35,6 +35,7 @@ public class S3_v2_controller {
     objectVersionService.updateLastModifiedByPurpose(S3BucketPurpose.DESTINATION, Instant.from(Instant.parse("2023-01-01T23:00:00.00Z")));
     return ResponseEntity.ok("console");
   }
+
   @GetMapping("/generate")
   public ResponseEntity<String> generate(@RequestParam int quantity) {
     service.generate(quantity);

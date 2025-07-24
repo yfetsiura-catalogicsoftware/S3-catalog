@@ -1,18 +1,28 @@
 package pl.catalogic.demo.s3.v2;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
-
+import static org.springframework.data.mongodb.core.aggregation.LookupOperation.newLookup;
+import static org.springframework.data.mongodb.core.aggregation.LookupOperation.newLookup;
+import org.springframework.data.mongodb.core.aggregation.Fields;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import org.bson.Document;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
+import org.springframework.data.mongodb.core.aggregation.Fields;
+import org.springframework.data.mongodb.core.aggregation.VariableOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Component;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
@@ -26,53 +36,31 @@ public class NonVersioningTransferAggregator {
     public NonVersioningTransferAggregator(MongoTemplate catalogMongoTemplate) {
         this.catalogMongoTemplate = catalogMongoTemplate;
     }
-    
 
-    public CloseableIterator<ObjectVersionSnapshot> findMissingSourceKeys(UUID jobDefinitionGuid, String bucket, String sourceEndpoint) {
-        var matchOperation = Aggregation.match(
-                Criteria.where("jobDefinitionGuid").is(jobDefinitionGuid)
-                        .and("bucket").is(bucket)
-                        .and("sourceEndpoint").is(sourceEndpoint));
 
-        var groupOperation = Aggregation.group("key")
-                .addToSet("s3BucketPurpose").as("purposes");
-
-        var matchMissingOperation = Aggregation.match(
-                new Criteria().andOperator(
-                        Criteria.where("purposes").size(1),
-                        Criteria.where("purposes").in(S3BucketPurpose.DESTINATION)
-                ));
-
-        var lookupOperation = Aggregation.lookup()
-                .from("object_version")
-                .localField("_id")
-                .foreignField("key")
-                .as("snapshots");
-
-        var matchDestinationOperation = Aggregation.match(
-                Criteria.where("snapshots").elemMatch(
-                        Criteria.where("s3BucketPurpose").is(S3BucketPurpose.DESTINATION)
-                                .and("jobDefinitionGuid").is(jobDefinitionGuid)
-                                .and("bucket").is(bucket)
-                                .and("sourceEndpoint").is(sourceEndpoint)
-                ));
-
-        var unwindOperation = Aggregation.unwind("snapshots");
-
-        var replaceRootOperation = Aggregation.replaceRoot("snapshots");
-
-        var aggregation = Aggregation.newAggregation(
-                matchOperation,
-                groupOperation,
-                matchMissingOperation,
-                lookupOperation,
-                matchDestinationOperation,
-                unwindOperation,
-                replaceRootOperation
+    public CloseableIterator<ObjectVersionSnapshot> findMissingSourceKeys(
+        UUID jobDefinitionGuid, String bucket, String sourceEndpoint) {
+        var destMatch = Aggregation.match(
+            Criteria.where("jobDefinitionGuid").is(jobDefinitionGuid)
+                .and("bucket").is(bucket)
+                .and("sourceEndpoint").is(sourceEndpoint)
+                .and("s3BucketPurpose").is(S3BucketPurpose.DESTINATION)
         );
-
-        return stream(aggregation);
+        var lookupSource = Aggregation.lookup(
+            "object_version",
+            "key",
+            "key",
+            "src"
+        );
+        var missingSrc = Aggregation.match(
+            Criteria.where("src.s3BucketPurpose").ne(S3BucketPurpose.SOURCE.name())
+        );
+        var agg = Aggregation.newAggregation(destMatch, lookupSource, missingSrc);
+        return stream(agg);
     }
+
+
+
 
     private CloseableIterator<ObjectVersionSnapshot> stream(Aggregation agg) {
         return CloseableIteratorImpl.toCloseableIterator(
