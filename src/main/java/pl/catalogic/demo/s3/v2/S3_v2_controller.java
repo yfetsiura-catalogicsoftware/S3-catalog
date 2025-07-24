@@ -5,9 +5,11 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.catalogic.demo.s3.v2.model.S3BucketPurpose;
 
@@ -34,10 +36,17 @@ public class S3_v2_controller {
     return ResponseEntity.ok("console");
   }
   @GetMapping("/generate")
-  public ResponseEntity<String> generate() {
-    service.generate();
+  public ResponseEntity<String> generate(@RequestParam int quantity) {
+    service.generate(quantity);
     return ResponseEntity.ok("generate");
   }
 
-
+  @DeleteMapping("/delete")
+  public ResponseEntity<String> delete(
+      @RequestParam String key,
+      @RequestParam S3BucketPurpose purpose
+  ) {
+    objectVersionService.deleteByKeyAndPurpose(key, purpose);
+    return ResponseEntity.ok("deleted");
+  }
 }

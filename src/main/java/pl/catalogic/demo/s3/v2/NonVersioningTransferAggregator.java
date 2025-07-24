@@ -1,83 +1,101 @@
 package pl.catalogic.demo.s3.v2;
 
-import java.util.*;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Component;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import pl.catalogic.demo.s3.v2.model.S3BucketPurpose;
 
 @Component
 public class NonVersioningTransferAggregator {
-  public static final int S3_BATCH_SIZE = 1000;
-  private final MongoTemplate mongoTemplate;
-  private static final Logger log = LoggerFactory.getLogger(NonVersioningTransferAggregator.class);
+    public static final int S3_BATCH_SIZE = 1000;
+    private final MongoTemplate catalogMongoTemplate;
 
-  public NonVersioningTransferAggregator(MongoTemplate mongoTemplate) {
-    this.mongoTemplate = mongoTemplate;
-  }
-
-  /**
-   * Витягує DESTINATION-об'єкти, для яких НЕ існує SOURCE-копії по key+bucket+sourceEndpoint+jobDefinitionGuid
-   */
-  public CloseableIterator<ObjectVersionSnapshot> toDelete(
-      UUID jobId, String bucketName, String sourceEndpoint
-  ) {
-    var pipeline = List.of(
-        new Document("$match", new Document()
-            .append("s3BucketPurpose", "DESTINATION")
-            .append("jobDefinitionGuid", jobId)
-            .append("bucket", bucketName)
-            .append("sourceEndpoint", sourceEndpoint)
-        ),
-        new Document("$lookup", new Document()
-            .append("from", "object_version")
-            .append("let", new Document()
-                .append("key", "$key")
-                .append("bucket", "$bucket")
-                .append("sourceEndpoint", "$sourceEndpoint")
-                .append("jobDefinitionGuid", "$jobDefinitionGuid")
-            )
-            .append("pipeline", List.of(
-                new Document("$match", new Document("$expr",
-                    new Document("$and", List.of(
-                        new Document("$eq", List.of("$key", "$$key")),
-                        new Document("$eq", List.of("$s3BucketPurpose", "SOURCE")),
-                        new Document("$eq", List.of("$bucket", "$$bucket")),
-                        new Document("$eq", List.of("$sourceEndpoint", "$$sourceEndpoint")),
-                        new Document("$eq", List.of("$jobDefinitionGuid", "$$jobDefinitionGuid"))
-                    ))
-                )),
-                new Document("$limit", 1)
-            ))
-            .append("as", "src")
-        ),
-        new Document("$match", new Document("src", new Document("$size", 0))),
-        new Document("$sort", new Document("_id", 1))
-    );
-
-    var cursor = mongoTemplate
-        .getCollection("object_version")
-        .aggregate(pipeline)
-        .allowDiskUse(true)
-        .batchSize(S3_BATCH_SIZE);
-
-    return CloseableIteratorImpl.toCloseableIterator(
-        cursor.iterator(),
-        d -> mongoTemplate.getConverter().read(ObjectVersionSnapshot.class, d)
-    );
-  }
-
-  public List<ObjectVersionSnapshot> delete(UUID jobDefinitionId, String bucket, String sourceEndpoint) {
-    var files = new ArrayList<ObjectVersionSnapshot>();
-    try (var iterator = toDelete(jobDefinitionId, bucket, sourceEndpoint)) {
-      while (iterator.hasNext()) {
-        files.add(iterator.next());
-      }
+    public NonVersioningTransferAggregator(MongoTemplate catalogMongoTemplate) {
+        this.catalogMongoTemplate = catalogMongoTemplate;
     }
-    return files;
-  }
+    
+
+    public CloseableIterator<ObjectVersionSnapshot> findMissingSourceKeys(UUID jobDefinitionGuid, String bucket, String sourceEndpoint) {
+        var matchOperation = Aggregation.match(
+                Criteria.where("jobDefinitionGuid").is(jobDefinitionGuid)
+                        .and("bucket").is(bucket)
+                        .and("sourceEndpoint").is(sourceEndpoint));
+
+        var groupOperation = Aggregation.group("key")
+                .addToSet("s3BucketPurpose").as("purposes");
+
+        var matchMissingOperation = Aggregation.match(
+                new Criteria().andOperator(
+                        Criteria.where("purposes").size(1),
+                        Criteria.where("purposes").in(S3BucketPurpose.DESTINATION)
+                ));
+
+        var lookupOperation = Aggregation.lookup()
+                .from("object_version")
+                .localField("_id")
+                .foreignField("key")
+                .as("snapshots");
+
+        var matchDestinationOperation = Aggregation.match(
+                Criteria.where("snapshots").elemMatch(
+                        Criteria.where("s3BucketPurpose").is(S3BucketPurpose.DESTINATION)
+                                .and("jobDefinitionGuid").is(jobDefinitionGuid)
+                                .and("bucket").is(bucket)
+                                .and("sourceEndpoint").is(sourceEndpoint)
+                ));
+
+        var unwindOperation = Aggregation.unwind("snapshots");
+
+        var replaceRootOperation = Aggregation.replaceRoot("snapshots");
+
+        var aggregation = Aggregation.newAggregation(
+                matchOperation,
+                groupOperation,
+                matchMissingOperation,
+                lookupOperation,
+                matchDestinationOperation,
+                unwindOperation,
+                replaceRootOperation
+        );
+
+        return stream(aggregation);
+    }
+
+    private CloseableIterator<ObjectVersionSnapshot> stream(Aggregation agg) {
+        return CloseableIteratorImpl.toCloseableIterator(
+                catalogMongoTemplate.aggregateStream(
+                        agg.withOptions(writeableToDiskWithCursor()),
+                        "object_version",
+                        ObjectVersionSnapshot.class));
+    }
+
+    private static AggregationOptions writeableToDiskWithCursor() {
+        return AggregationOptions.builder()
+                .allowDiskUse(true)
+                .cursorBatchSize(S3_BATCH_SIZE)
+                .build();
+    }
+
+    public List<ObjectVersionSnapshot> delete(UUID jobDefinitionId, String bucket, String sourceEndpoint) {
+        var files = new ArrayList<ObjectVersionSnapshot>();
+        try (var iterator = findMissingSourceKeys(jobDefinitionId, bucket, sourceEndpoint)) {
+            while (iterator.hasNext()) {
+                files.add(iterator.next());
+            }
+        }
+        return files;
+    }
 }

@@ -1,23 +1,16 @@
 package pl.catalogic.demo.s3.v2;
 
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
 import pl.catalogic.demo.s3.v2.model.S3BucketPurpose;
-import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshotRepository;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +27,15 @@ public class ObjectVersionService {
         var result = mongoTemplate.updateMulti(query, update, ObjectVersionSnapshot.class);
         log.info("Updated {} documents with purpose {} to lastModified: {}", 
                 result.getModifiedCount(), purpose, lastModified);
+    }
+
+    public void deleteByKeyAndPurpose(String key, S3BucketPurpose purpose) {
+        var query = Query.query(
+            Criteria.where("key").is(key)
+                .and("s3BucketPurpose").is(purpose)
+        );
+
+        var result = mongoTemplate.remove(query, ObjectVersionSnapshot.class);
+        log.info("Deleted {} documents with key={} and purpose={}", result.getDeletedCount(), key, purpose);
     }
 } 

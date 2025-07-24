@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshotRepository;
@@ -66,16 +67,18 @@ public class S3_v2_service {
 //            "sourceEnd");
 
     System.out.println("---------files------------------");
-    list.stream().forEach(System.out::println);
+    list.forEach(System.out::println);
     System.out.println("---------------------------");
   }
 
-  public void generate() {
-    List<ObjectVersionSnapshot> toSav = new ArrayList<>();
-    for(int i=0; i<250_000;i++){
-      toSav.add(new ObjectVersionSnapshot(
+  public void generate(int quantity) {
+    int batchSize = 1_000_000;
+    var batch = new ArrayList<ObjectVersionSnapshot>(batchSize);
+
+    for (int i = 0; i < quantity; i++) {
+      batch.add(new ObjectVersionSnapshot(
           "",
-          i+"_object",
+          i + "_object",
           Instant.parse("2023-01-01T00:00:00.00Z"),
           S3BucketPurpose.SOURCE,
           1024,
@@ -83,13 +86,23 @@ public class S3_v2_service {
           "endpoint",
           "milion"
       ));
+
+      if (batch.size() == batchSize) {
+        repository.saveAll(batch);
+        batch.clear();
+      }
     }
-    repository.saveAll(toSav);
-    List<ObjectVersionSnapshot> toSaveDest = new ArrayList<>();
-    for(int j=0; j<250_000;j++){
-      toSaveDest.add(new ObjectVersionSnapshot(
+
+    if (!batch.isEmpty()) {
+      repository.saveAll(batch);
+    }
+
+    // тепер DESTINATION
+    batch.clear();
+    for (int j = 0; j < quantity; j++) {
+      batch.add(new ObjectVersionSnapshot(
           "",
-          j+"_object",
+          j + "_object",
           Instant.parse("2023-01-01T23:00:00.00Z"),
           S3BucketPurpose.DESTINATION,
           1024,
@@ -97,68 +110,21 @@ public class S3_v2_service {
           "endpoint",
           "milion"
       ));
+
+      if (batch.size() == batchSize) {
+        repository.saveAll(batch);
+        batch.clear();
+      }
     }
-    repository.saveAll(toSaveDest);
-  }
 
-  /**
-   * Отримує список всіх доступних бакетів
-   */
-  public CompletableFuture<List<Bucket>> getAllBuckets(S3AsyncClient client) {
-    return client.listBuckets()
-        .thenApply(ListBucketsResponse::buckets)
-        .thenApply(buckets -> {
-          System.out.println("---------buckets------------------");
-          buckets.forEach(bucket -> 
-              System.out.println("Bucket: " + bucket.name() + ", Created: " + bucket.creationDate()));
-          System.out.println("Total buckets: " + buckets.size());
-          System.out.println("---------------------------");
-          return buckets;
-        })
-        .exceptionally(throwable -> {
-          System.err.println("Error getting buckets: " + throwable.getMessage());
-          throw new RuntimeException(throwable);
-        });
-  }
-
-  /**
-   * Рахує кількість файлів у вказаному бакеті
-   */
-  public CompletableFuture<Integer> countObjectsInBucket(S3AsyncClient client, String bucketName) {
-    return countObjectsRecursively(client, bucketName, null, 0)
-        .thenApply(count -> {
-          System.out.println("---------object count------------------");
-          System.out.println("Bucket: " + bucketName + ", Files count: " + count);
-          System.out.println("---------------------------");
-          return count;
-        })
-        .exceptionally(throwable -> {
-          System.err.println("Error counting files in bucket " + bucketName + ": " + throwable.getMessage());
-          throw new RuntimeException(throwable);
-        });
-  }
-
-  private CompletableFuture<Integer> countObjectsRecursively(
-      S3AsyncClient client, String bucketName, String continuationToken, int currentCount) {
-    
-    var requestBuilder = ListObjectsV2Request.builder()
-        .bucket(bucketName)
-        .maxKeys(1000);
-    
-    if (continuationToken != null) {
-      requestBuilder.continuationToken(continuationToken);
+    if (!batch.isEmpty()) {
+      repository.saveAll(batch);
     }
-    
-    return client.listObjectsV2(requestBuilder.build())
-        .thenCompose(response -> {
-          var newCount = currentCount + response.keyCount();
-          
-          if (response.isTruncated()) {
-            return countObjectsRecursively(client, bucketName, 
-                response.nextContinuationToken(), newCount);
-          } else {
-            return CompletableFuture.completedFuture(newCount);
-          }
-        });
+
+    System.out.println("done");
   }
+
+
+
+
 }

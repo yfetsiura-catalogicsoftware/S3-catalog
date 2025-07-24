@@ -9,11 +9,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import software.amazon.awssdk.services.s3.model.ObjectVersion;
 
 @Document("object_version")
-@CompoundIndex(
-    name = "src_lookup_eq_idx",
-    def  = "{'key':1,'s3BucketPurpose':1,'bucket':1,'sourceEndpoint':1,'jobDefinitionGuid':1}",
-    partialFilter = "{'s3BucketPurpose':'SOURCE'}"
-)
+@CompoundIndexes({
+    @CompoundIndex(name = "job_bucket_endpoint_idx", 
+        def = "{'jobDefinitionGuid': 1, 'bucket': 1, 'sourceEndpoint': 1}"),
+    @CompoundIndex(name = "purpose_key_idx", 
+        def = "{'s3BucketPurpose': 1, 'key': 1}")
+})
 public class ObjectVersionSnapshot {
 
   @Id private String id;
@@ -61,6 +62,14 @@ public class ObjectVersionSnapshot {
     this.jobDefinitionGuid = jobDefinitionGuid;
     this.sourceEndpoint = sourceEndpoint;
     this.bucket = bucket;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getVersionId() {
