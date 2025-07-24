@@ -19,6 +19,7 @@ import pl.catalogic.demo.s3.v2.model.S3BucketPurpose;
 public class S3_v2_controller {
   private final S3_v2_service service;
   private final ObjectVersionService objectVersionService;
+
   @GetMapping
   public ResponseEntity<String> replication() {
     var startTime = Instant.now();
@@ -41,6 +42,11 @@ public class S3_v2_controller {
     service.generate(quantity);
     return ResponseEntity.ok("generate");
   }
+  @GetMapping("/index")
+  public ResponseEntity<String> index() {
+    objectVersionService.resetIndexes();
+    return ResponseEntity.ok("generate");
+  }
 
   @DeleteMapping("/delete")
   public ResponseEntity<String> delete(
@@ -50,4 +56,6 @@ public class S3_v2_controller {
     objectVersionService.deleteByKeyAndPurpose(key, purpose);
     return ResponseEntity.ok("deleted");
   }
+
+
 }
