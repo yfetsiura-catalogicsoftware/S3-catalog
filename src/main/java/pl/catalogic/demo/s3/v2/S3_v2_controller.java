@@ -2,12 +2,10 @@ package pl.catalogic.demo.s3.v2;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +21,7 @@ public class S3_v2_controller {
   @GetMapping
   public ResponseEntity<String> replication() {
     var startTime = Instant.now();
-    System.out.println("start aggregation");
+    System.out.println("start aggregation " + Instant.now());
     service.getAllFroms();
     var duration = Duration.between(startTime, Instant.now());
     System.out.println("Completed toDelete aggregation in " + duration.toSeconds() + " s");
