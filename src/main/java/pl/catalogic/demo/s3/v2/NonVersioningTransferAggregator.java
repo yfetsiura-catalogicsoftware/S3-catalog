@@ -41,11 +41,10 @@ public class NonVersioningTransferAggregator {
   }
 
   private CloseableIterator<ObjectVersionSnapshot> stream(Aggregation agg) {
-    return CloseableIteratorImpl.toCloseableIterator(
-        catalogMongoTemplate.aggregateStream(
-            agg.withOptions(writeableToDiskWithCursor()),
-            "object_version",
-            ObjectVersionSnapshot.class));
+    return catalogMongoTemplate.aggregateStream(
+        agg.withOptions(writeableToDiskWithCursor()),
+        "object_version",
+        ObjectVersionSnapshot.class);
   }
 
   private static AggregationOptions writeableToDiskWithCursor() {

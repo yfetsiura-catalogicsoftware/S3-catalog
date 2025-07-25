@@ -26,7 +26,7 @@ public class S3_v2_service {
   private final S3Client s3Client;
   private final TestAggregator testAggregator;
   private final NonVersioningTransferAggregator nonVersioningTransferAggregator;
-  private final VersioningTransferAggregator versioningTransferAggregator;
+//  private final VersioningTransferAggregator versioningTransferAggregator;
   private static final String access = "NgiuzPiqBeW6s0Z2Cvyt";
   private static final String secret = "Cyif4IqnUfaz40Pezv3r5YqpZGOIgH01UC3FCZ7f";
   private static final String end = "http://172.26.0.137:9004";

@@ -11,23 +11,12 @@ import software.amazon.awssdk.services.s3.model.ObjectVersion;
 @Document("object_version")
 @CompoundIndexes({
     @CompoundIndex(
-        name = "dest_job_bucket_endpoint_key_idx",
-        def = "{ 'jobDefinitionGuid':1, 'bucket':1, 'sourceEndpoint':1, 'key':1 }",
-        partialFilter = "{ s3BucketPurpose: 'DESTINATION' }"
-    ),
-    @CompoundIndex(
-        name = "src_job_bucket_endpoint_key_idx",
-        def = "{ 'jobDefinitionGuid':1, 'bucket':1, 'sourceEndpoint':1, 'key':1 }",
-        partialFilter = "{ s3BucketPurpose: 'SOURCE' }"
-    ),
-    @CompoundIndex(
-        name = "key_purpose_idx",
-        def = "{ 'key':1, 's3BucketPurpose':1 }"
-    ),
-    @CompoundIndex(
-        name = "key_idx",
-        def = "{ 'key':1 }"
-    )
+        name = "job_bucket_endpoint_key_purpose_idx",
+        def =
+            "{ 'jobDefinitionGuid':1, 'bucket':1, 'sourceEndpoint':1,"
+                + " 'key':1, 's3BucketPurpose':1 }"),
+    @CompoundIndex(name = "key_purpose_idx", def = "{ 'key':1, 's3BucketPurpose':1 }"),
+    @CompoundIndex(name = "key_idx", def = "{ 'key':1 }")
 })
 public class ObjectVersionSnapshot {
 
