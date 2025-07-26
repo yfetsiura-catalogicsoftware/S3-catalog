@@ -3,21 +3,13 @@ package pl.catalogic.demo.s3.v2;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshot;
 import pl.catalogic.demo.s3.v2.model.ObjectVersionSnapshotRepository;
 import pl.catalogic.demo.s3.v2.model.S3BucketPurpose;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 
 @Component
 @AllArgsConstructor
@@ -34,15 +26,19 @@ public class S3_v2_service {
 
   @SneakyThrows
   public void getAllFroms() {
-    var from = Date.from(Instant.parse("2025-07-15T09:00:00.00Z"));
-    var to = Date.from(Instant.parse("2025-07-15T12:30:00.00Z"));
+    var from = Date.from(Instant.parse("2022-01-01T00:00:00.00Z"));
+    var to = Date.from(Instant.parse("2024-01-02T00:00:00.00Z"));
 
     //    var list = versioningTransferAggregator.toDeleteBeforeTransfer(
     //        UUID.fromString("00000000-0000-0000-0000-000000000000"),from,to,
     // "bucket","sourceEnd");
-    //    var list = nonVersioningTransferAggregator.toTransfer(
-    //        UUID.fromString("00000000-0000-0000-0000-000000000000"), from, to, "bucket",
-    // "sourceEnd");
+//    var list =
+//        nonVersioningTransferAggregator.transfer(
+//            UUID.fromString("00000000-0000-0000-0000-000000000000"),
+//            "milion",
+//            "endpoint",
+//            from,
+//            to);
         var list = nonVersioningTransferAggregator.delete(
             UUID.fromString("00000000-0000-0000-0000-000000000000"), "milion", "endpoint");
 //    var list =

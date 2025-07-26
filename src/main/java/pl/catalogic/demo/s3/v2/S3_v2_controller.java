@@ -20,11 +20,7 @@ public class S3_v2_controller {
 
   @GetMapping
   public ResponseEntity<String> replication() {
-    var startTime = Instant.now();
-    System.out.println("start aggregation " + Instant.now());
     service.getAllFroms();
-    var duration = Duration.between(startTime, Instant.now());
-    System.out.println("Completed toDelete aggregation in " + duration.toSeconds() + " s");
     return ResponseEntity.ok("console");
   }
 

@@ -5,18 +5,28 @@ import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import software.amazon.awssdk.services.s3.model.ObjectVersion;
 
 @Document("object_version")
 @CompoundIndexes({
     @CompoundIndex(
-        name = "job_bucket_endpoint_key_purpose_idx",
-        def =
-            "{ 'jobDefinitionGuid':1, 'bucket':1, 'sourceEndpoint':1,"
-                + " 'key':1, 's3BucketPurpose':1 }"),
-    @CompoundIndex(name = "key_purpose_idx", def = "{ 'key':1, 's3BucketPurpose':1 }"),
-    @CompoundIndex(name = "key_idx", def = "{ 'key':1 }")
+        def = "{'s3BucketPurpose': 1, 'jobDefinitionGuid': 1, 'bucket': 1, 'sourceEndpoint': 1, "
+            + "'lastModified': 1, 'key': 1}",
+        name = "source_ops_idx"),
+    @CompoundIndex(
+        def = "{'s3BucketPurpose': 1, 'jobDefinitionGuid': 1, 'bucket': 1, 'sourceEndpoint': 1, "
+            + "'key': 1}",
+        name = "dest_ops_idx"),
+    @CompoundIndex(
+        def = "{'key': 1, 's3BucketPurpose': 1, 'jobDefinitionGuid': 1, 'bucket': 1, "
+            + "'sourceEndpoint': 1}",
+        name = "lookup_join_idx"),
+    @CompoundIndex(
+        def = "{'lastModified': 1, 's3BucketPurpose': 1, 'jobDefinitionGuid': 1, 'bucket': 1, 'sourceEndpoint': 1}",
+        name = "lm_purpose_job_bucket_ep"
+    )
 })
 public class ObjectVersionSnapshot {
 
